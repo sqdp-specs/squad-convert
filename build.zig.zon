@@ -1,0 +1,26 @@
+.{
+    .name = .squadc,
+    .version = "0.0.0",
+    .fingerprint = 0x3818784b509c72c4,
+    .minimum_zig_version = "0.15.1",
+    .dependencies = .{
+        .libxml2 = .{
+            .url = "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.13.5/libxml2-v2.13.5.tar.gz",
+            .hash = "N-V-__8AALhJnQFEyD-r67NUdrbzKo_FzIluLJQg1-mTCpuY",
+        },
+        .miniz = .{
+            .url = "https://github.com/richgel999/miniz/releases/download/3.0.2/miniz-3.0.2.zip",
+            .hash = "N-V-__8AAEznBgA2IJu6nHlNhEA_PuUhTFkC2d2TkLxuKGfe",
+            .lazy = false,
+        },
+        .zqlite = .{
+            .url = "git+https://github.com/karlseguin/zqlite.zig?ref=master#74e661633ffe04fadc214ad07857633fa339f79c",
+            .hash = "zqlite-0.0.0-RWLaY81-lQAbR_uUQJeKmTzYi16C9Zvl-BjrBOavQfeK",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
