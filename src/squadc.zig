@@ -5,11 +5,11 @@ const miniz = @import("miniz");
 
 pub fn convert() !void {}
 
-test {
-    std.testing.refAllDecls(@This());
-}
-
 const example = "test/northwind.siard";
+
+test "tests" {
+    _ = @import("Siard.zig");
+}
 
 test "unzip" {
     var s: miniz.mz_zip_archive = std.mem.zeroes(miniz.mz_zip_archive);
