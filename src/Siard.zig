@@ -3,71 +3,38 @@ const xml = @import("xml");
 const Allocator = std.mem.Allocator;
 
 pub const Metadata = struct {
-    dbname: ?[:0]const u8 = null,
-    dataOwner: ?[:0]const u8 = null,
-    dataOriginTimespan: ?[:0]const u8 = null,
-    lobFolder: ?[:0]const u8 = null,
-    producerApplication: ?[:0]const u8 = null,
-    archivalData: ?[:0]const u8 = null,
-    messageDigest: ?[:0]const u8 = null,
-    clientMachine: ?[:0]const u8 = null,
-    databaseProduct: ?[:0]const u8 = null,
-    connection: ?[:0]const u8 = null,
-    databaseUser: ?[:0]const u8 = null,
+    dbname: ?[]const u8 = null,
+    dataOwner: ?[]const u8 = null,
+    dataOriginTimespan: ?[]const u8 = null,
+    lobFolder: ?[]const u8 = null,
+    producerApplication: ?[]const u8 = null,
+    archivalDate: ?[]const u8 = null,
+    messageDigest: ?[]const u8 = null,
+    clientMachine: ?[]const u8 = null,
+    databaseProduct: ?[]const u8 = null,
+    connection: ?[]const u8 = null,
+    databaseUser: ?[]const u8 = null,
 
-    fn update(self: *Metadata, name: []const u8, value: [:0]const u8) bool {
-        inline for (comptime std.meta.fieldNames(@TypeOf(self.*))) |nm| {
-            if (std.mem.eql(u8, nm, name)) {
-                @field(self, nm) = value;
-                return true;
-            }
+    fn init(self: *Metadata, alloc: Allocator, root: xml.xmlNodePtr) !xml.xmlNodePtr {
+        var curr = xml.xmlFirstElementChild(root);
+        while (curr != null and !std.mem.eql(u8, std.mem.span(curr.*.name), "schemas")) : (curr = xml.xmlNextElementSibling(curr)) {
+            const value = try alloc.dupe(u8, std.mem.trim(u8, std.mem.span(xml.xmlNodeGetContent(curr)), " \t\r\n"));
+            inline for (comptime std.meta.fieldNames(@TypeOf(self.*))) |nm| {
+                if (std.mem.eql(u8, nm, std.mem.span(curr.*.name))) {
+                    @field(self, nm) = value;
+                    break;
+                }
+            } else alloc.free(value);
         }
-        return false;
+        return curr;
     }
 
-    fn free(self: *Metadata, alloc: Allocator) void {
+    fn deinit(self: *Metadata, alloc: Allocator) void {
         inline for (comptime std.meta.fieldNames(@TypeOf(self.*))) |nm| {
             if (@field(self, nm)) |v| alloc.free(v);
         }
     }
 };
-
-const Schema = struct {
-    name: []const u8,
-    folder: []const u8,
-};
-
-const Table = struct {};
-
-pub fn equals(a: [*]const xml.xmlChar, b: []const u8) bool {
-    for (b, 0..) |char, idx| if (a[idx] != char) return false;
-    return a[b.len] == 0;
-}
-
-// length includes the sentinel
-fn xmlStrLen(a: [*]const xml.xmlChar) usize {
-    var idx: usize = 0;
-    while (true) : (idx += 1) if (a[idx] == 0) return idx + 1;
-}
-
-pub fn xmlStrDup(ally: Allocator, a: [*]const xml.xmlChar) ![:0]const u8 {
-    const len = xmlStrLen(a);
-    const arr = try ally.alloc(u8, len);
-    var idx: usize = 0;
-    while (idx < len) : (idx += 1) {
-        arr[idx] = a[idx];
-    }
-    return arr[0 .. len - 1 :0];
-}
-
-test "dbname" {
-    var m = Metadata{};
-    _ = m.update("dbname", "test");
-    try std.testing.expect(m.dbname != null);
-    if (m.dbname) |v| {
-        try std.testing.expectEqualStrings(v, "test");
-    }
-}
 
 test "metadata" {
     const example =
@@ -90,20 +57,18 @@ test "metadata" {
         \\   </siardArchive>
     ;
     const d = xml.xmlReadMemory(example.ptr, @intCast(example.len), null, "utf-8", xml.XML_PARSE_NOBLANKS | xml.XML_PARSE_RECOVER | xml.XML_PARSE_NOERROR | xml.XML_PARSE_NOWARNING);
-    var m = Metadata{};
     const root = xml.xmlDocGetRootElement(d);
-    var curr = xml.xmlFirstElementChild(root);
-    while (curr != null) : (curr = xml.xmlNextElementSibling(curr)) {
-        const nm = try xmlStrDup(std.testing.allocator, curr.*.name);
-        const content = try xmlStrDup(std.testing.allocator, xml.xmlNodeGetContent(curr));
-
-        if (!m.update(nm, content)) {
-            std.testing.allocator.free(content);
-        }
-        std.testing.allocator.free(nm);
-    }
-    if (m.archivalData) |v| {
-        try std.testing.expectEqualStrings(v, "2015-11-26");
-    }
-    m.free(std.testing.allocator);
+    var m = Metadata{};
+    const schema_ptr = try m.init(std.testing.allocator, root);
+    try std.testing.expect(schema_ptr != null);
+    try std.testing.expect(m.databaseProduct != null);
+    try std.testing.expectEqualStrings(m.databaseProduct.?, "Microsoft SQL Server 12.00.2000");
+    m.deinit(std.testing.allocator);
 }
+
+const Schema = struct {
+    name: []const u8,
+    folder: []const u8,
+};
+
+const Table = struct {};
