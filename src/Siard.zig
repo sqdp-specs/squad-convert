@@ -14,6 +14,9 @@ pub const Metadata = struct {
     databaseProduct: ?[]const u8 = null,
     connection: ?[]const u8 = null,
     databaseUser: ?[]const u8 = null,
+    schemas: ?[]Schema = null,
+    users: ?[]User = null,
+    roles: ?[]Role = null,
 
     fn init(self: *Metadata, alloc: Allocator, root: xml.xmlNodePtr) !xml.xmlNodePtr {
         var curr = xml.xmlFirstElementChild(root);
@@ -35,6 +38,43 @@ pub const Metadata = struct {
         }
     }
 };
+
+const Schema = struct {
+    name: []const u8,
+    folder: []const u8,
+    tables: []Table,
+    views: []View,
+    routines: []Routine,
+};
+
+const Table = struct {
+    name: []const u8,
+    folder: []const u8,
+    description: []const u8,
+    columns: []Column,
+    primaryKey: PrimaryKey,
+    foreignKeys: []ForeignKey,
+    rows: u64,
+};
+
+const Column = struct {
+    name: []const u8,
+    typ: []const u8,
+    typeOriginal: []const u8,
+    nullable: bool,
+};
+
+const PrimaryKey = struct {};
+
+const ForeignKey = struct {};
+
+const View = struct {};
+
+const Routine = struct {};
+
+const User = struct {};
+
+const Role = struct {};
 
 test "metadata" {
     const example =
@@ -65,10 +105,3 @@ test "metadata" {
     try std.testing.expectEqualStrings(m.databaseProduct.?, "Microsoft SQL Server 12.00.2000");
     m.deinit(std.testing.allocator);
 }
-
-const Schema = struct {
-    name: []const u8,
-    folder: []const u8,
-};
-
-const Table = struct {};
