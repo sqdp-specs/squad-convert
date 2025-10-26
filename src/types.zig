@@ -1,3 +1,4 @@
+const std = @import("std");
 const xml = @import("xml");
 
 fn index(z: u8, a: [*]const xml.xmlChar) ?usize {
@@ -108,12 +109,37 @@ const Qualified = struct {
 
     fn fromStr(str: [*]const xml.xmlChar) Qualified {
         const t = QualType.fromStr(str);
-        if (t == .none) return Qualified{
-            .typ = t,
+
+        if (idx == null or t == .none) return Qualified{
+            .typ = .none,
             .qualifier = .{ 0, 0 },
         };
+
+        std.fmt.parseInt(u8, foo, 10);
     }
 };
+
+fn getQualifier(str: [*]const xml.xmlChar) ?[2]u8 {
+    var sidx: usize = index('(', str) orelse return null;
+    sidx += 1;
+    var eidx = sidx;
+    var ret = [2]u8;
+    var i = 0;
+    while (true) : (eidx += 1) {
+      if (eidx == ',') {
+        if (eidx == sidx) return null;
+        i += 1;
+        if (i > 1) return null;
+        eidx += 1;
+        sidx = eidx;
+        continue;
+      }
+      if (eidx == ')' or eidx == 0) {
+         if (eidx == sidx) return null;
+         ret[i] = std.fmt.parseInt(u8, ))
+      }
+    }
+}
 
 // INTERVAL <start> [TO <end>] xs:duration
 const Interval = struct {
