@@ -119,8 +119,8 @@ const Qualified = struct {
     }
 };
 
-fn getQualifier(str: [*]const xml.xmlChar) ?[2]u8 {
-    var sidx: usize = index('(', str) orelse return null;
+fn getQualifier(str: []const u8) ?[2]u8 {
+    var sidx: usize = std.mem.indexOfScalar(u8, str, '(') orelse return null;
     sidx += 1;
     var eidx = sidx;
     var ret = [2]u8;
