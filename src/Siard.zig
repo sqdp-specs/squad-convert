@@ -1,6 +1,26 @@
 const std = @import("std");
 const xml = @import("xml");
 const Allocator = std.mem.Allocator;
+const Typ = @import("types.zig").Typ;
+const Siard = @This();
+
+metadata: Metadata,
+schemas: []Schema,
+// users: ?[]User = null,
+// roles: ?[]Role = null,
+
+pub fn new(alloc: Allocator, doc: [*c]xml.xmlDoc) !*Siard {
+    const ret = try alloc.create(Siard);
+    const root = xml.xmlDocGetRootElement(doc);
+    ret.metadata = Metadata{};
+    _ = try ret.metadata.init(alloc, root);
+    return ret;
+}
+
+pub fn deinit(self: *Siard, alloc: Allocator) void {
+    self.metadata.deinit(alloc);
+    alloc.destroy(self);
+}
 
 pub const Metadata = struct {
     dbname: ?[]const u8 = null,
@@ -14,9 +34,6 @@ pub const Metadata = struct {
     databaseProduct: ?[]const u8 = null,
     connection: ?[]const u8 = null,
     databaseUser: ?[]const u8 = null,
-    schemas: ?[]Schema = null,
-    users: ?[]User = null,
-    roles: ?[]Role = null,
 
     fn init(self: *Metadata, alloc: Allocator, root: xml.xmlNodePtr) !xml.xmlNodePtr {
         var curr = xml.xmlFirstElementChild(root);
@@ -59,7 +76,7 @@ const Table = struct {
 
 const Column = struct {
     name: []const u8,
-    typ: []const u8,
+    typ: Typ,
     typeOriginal: []const u8,
     nullable: bool,
 };
@@ -76,7 +93,7 @@ const User = struct {};
 
 const Role = struct {};
 
-test "metadata" {
+test "siard" {
     const example =
         \\ <?xml version="1.0" encoding="UTF-8" standalone="no"?>
         \\ <?xml-stylesheet type="text/xsl" href="metadata.xsl"?><siardArchive xmlns="http://www.bar.admin.ch/xmlns/siard/1.0/metadata.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://www.bar.admin.ch/xmlns/siard/1.0/metadata.xsd metadata.xsd">
@@ -96,12 +113,11 @@ test "metadata" {
         \\   <schemas/>
         \\   </siardArchive>
     ;
+
     const d = xml.xmlReadMemory(example.ptr, @intCast(example.len), null, "utf-8", xml.XML_PARSE_NOBLANKS | xml.XML_PARSE_RECOVER | xml.XML_PARSE_NOERROR | xml.XML_PARSE_NOWARNING);
-    const root = xml.xmlDocGetRootElement(d);
-    var m = Metadata{};
-    const schema_ptr = try m.init(std.testing.allocator, root);
-    try std.testing.expect(schema_ptr != null);
-    try std.testing.expect(m.databaseProduct != null);
-    try std.testing.expectEqualStrings(m.databaseProduct.?, "Microsoft SQL Server 12.00.2000");
-    m.deinit(std.testing.allocator);
+    defer xml.xmlFreeDoc(d);
+    const s = try new(std.testing.allocator, d);
+    defer s.deinit(std.testing.allocator);
+    try std.testing.expect(s.metadata.databaseProduct != null);
+    try std.testing.expectEqualStrings(s.metadata.databaseProduct.?, "Microsoft SQL Server 12.00.2000");
 }

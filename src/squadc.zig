@@ -9,6 +9,7 @@ const example = "test/northwind.siard";
 
 test "tests" {
     _ = @import("Siard.zig");
+    _ = @import("types.zig");
 }
 
 test "unzip" {
@@ -27,6 +28,20 @@ test "unzip" {
 test "sqlite" {
     const flags = zqlite.OpenFlags.Create | zqlite.OpenFlags.EXResCode;
     var conn = try zqlite.open("test.squad", flags);
+    try conn.exec(
+        \\ CREATE TABLE if not exists artist(
+        \\   artistid INTEGER,
+        \\   artistname TEXT
+        \\ )
+    , .{});
+    try conn.exec(
+        \\ CREATE TABLE if not exists track(
+        \\   trackid     INTEGER,
+        \\   trackname   TEXT,
+        \\   trackartist INTEGER,
+        \\   FOREIGN KEY(trackartist) REFERENCES artist(artistid)
+        \\ )
+    , .{});
     try conn.exec("create table if not exists test (name text)", .{});
     try conn.exec("insert into test (name) values (?1), (?2)", .{ "Leto", "Ghanima" });
     if (try conn.row("select * from test order by name limit 1", .{})) |row| {
