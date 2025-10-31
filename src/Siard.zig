@@ -39,11 +39,11 @@ pub fn deinit(self: *Siard, alloc: Allocator) void {
     alloc.destroy(self);
 }
 
-pub const metadataSchema =
+const metadataSchema =
     \\CREATE TABLE if not exists _metadata(dbname TEXT, dataOwner TEXT, dataOriginTimespan TEXT, lobFolder TEXT, producerApplication TEXT, archivalDate TEXT, messageDigest TEXT, clientMachine TEXT, databaseProduct TEXT, connection TEXT, databaseUser TEXT)
 ;
 
-pub const Metadata = struct {
+const Metadata = struct {
     dbname: ?[]const u8 = null,
     dataOwner: ?[]const u8 = null,
     dataOriginTimespan: ?[]const u8 = null,
@@ -74,6 +74,11 @@ pub const Metadata = struct {
         inline for (comptime std.meta.fieldNames(@TypeOf(self.*))) |nm| {
             if (@field(self, nm)) |v| alloc.free(v);
         }
+    }
+
+    pub fn sqlSchema(self: *Metadata) []const u8 {
+        _ = self;
+        return metadataSchema;
     }
 
     pub fn sqlInsert(self: *Metadata, alloc: Allocator) ![]const u8 {
@@ -193,7 +198,7 @@ const Table = struct {
     // \\   FOREIGN KEY(trackartist) REFERENCES artist(artistid)
     // \\ )
 
-    fn sqlSchema(self: *Table, alloc: Allocator) ![]u8 {
+    pub fn sqlSchema(self: *Table, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "CREATE TABLE if not exists ");
         try list.appendSlice(alloc, self.name);

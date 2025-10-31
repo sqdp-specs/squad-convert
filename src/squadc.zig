@@ -39,8 +39,8 @@ pub fn convert(alloc: Allocator, path: []const u8) !void {
     defer xml.xmlFreeDoc(doc);
     const s = try Siard.new(alloc, doc);
     defer s.deinit(alloc);
-    const str = try s.metadata.sqlInsert(alloc);
-    defer alloc.free(str);
+    const str = s.metadata.sqlSchema();
+    //defer alloc.free(str);
     std.debug.print("{s}", .{str});
     return;
 }
