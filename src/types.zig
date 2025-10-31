@@ -4,14 +4,21 @@ const xml = @import("xml");
 pub const Typ = union(enum) {
     unqualified: Unqualified,
     qualified: Qualified,
-    interval: Interval,
+    // interval: Interval, TODO
 
-    fn fromStr(str: []u8) Typ {
+    pub fn fromStr(str: []u8) Typ {
         const u = Unqualified.fromStr(str);
         if (u != .none) {
             return Typ{ .unqualified = u };
         }
         return Typ{ .qualified = Qualified.fromStr(str) };
+    }
+
+    pub fn asSqlite(self: Typ) []const u8 {
+        switch (self) {
+            .unqualified => |u| return u.asSqlite(),
+            .qualified => |q| return q.asSqlite(),
+        }
     }
 };
 
@@ -40,10 +47,15 @@ const Unqualified = enum {
         return .none;
     }
 
-    pub fn toStr(uq: Unqualified) []const u8 {
-        return switch (uq) {
-            else => "None",
-        };
+    fn asSqlite(self: Unqualified) []const u8 {
+        switch (self) {
+            .bigInt, .integer, .smallInt => return "INTEGER",
+            .boolean, .date => return "NUMERIC",
+            .real, .double => return "REAL",
+            .xml => return "TEXT",
+            .dataLink => return "BLOB",
+            .none => return "",
+        }
     }
 };
 
@@ -76,19 +88,13 @@ const QualType = enum {
         if (std.mem.startsWith(u8, str, "FLOAT(")) return .float;
         if (std.mem.startsWith(u8, str, "NATIONAL CHARACTER LARGE OBJECT(") or std.mem.startsWith(u8, str, "NCHAR LARGE OBJECT(") or std.mem.startsWith(u8, str, "NCLOB(")) return .nclob;
         if (std.mem.startsWith(u8, str, "NATIONAL CHARACTER VARYING(") or std.mem.startsWith(u8, str, "NATIONAL CHAR VARYING(") or std.mem.startsWith(u8, str, "NCHAR VARYING(")) return .nvarchar;
-        if (std.mem.startsWith(u8, str, "NNATIONAL CHARACTER(") or std.mem.startsWith(u8, str, "NCHAR(") or std.mem.startsWith(u8, str, "NATIONAL CHAR(")) return .nchar;
+        if (std.mem.startsWith(u8, str, "NATIONAL CHARACTER(") or std.mem.startsWith(u8, str, "NCHAR(") or std.mem.startsWith(u8, str, "NATIONAL CHAR(")) return .nchar;
         if (std.mem.startsWith(u8, str, "NUMERIC(")) return .float;
         if (std.mem.startsWith(u8, str, "TIME(")) return .time;
         if (std.mem.startsWith(u8, str, "TIME WITH TIME ZONE(")) return .timez;
         if (std.mem.startsWith(u8, str, "TIMESTAMP(")) return .timestamp;
         if (std.mem.startsWith(u8, str, "TIMESTAMP WITH TIME ZONE(")) return .timestampz;
         return .none;
-    }
-
-    pub fn toStr(uq: QualType) []const u8 {
-        return switch (uq) {
-            else => "None",
-        };
     }
 };
 
@@ -104,6 +110,16 @@ const Qualified = struct {
             .qualifier = .{ 0, 0 },
         };
         return Qualified{ .typ = t, .qualifier = q.? };
+    }
+
+    fn asSqlite(self: Qualified) []const u8 {
+        switch (self.typ) {
+            .decimal, .numeric => return "NUMERIC",
+            .float => return "REAL",
+            .clob, .varchar, .char, .nclob, .nvarchar, .nchar, .time, .timez, .timestamp, .timestampz => return "TEXT",
+            .blob, .varbinary, .binary => return "BLOB",
+            .none => return "",
+        }
     }
 };
 
