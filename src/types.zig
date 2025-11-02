@@ -14,6 +14,14 @@ pub const Typ = union(enum) {
         return Typ{ .qualified = Qualified.fromStr(str) };
     }
 
+    // should this type be enclosed in quotes in insert syntax
+    pub fn quote(self: Typ) bool {
+        switch (self) {
+            .unqualified => |u| return u.quote(),
+            .qualified => |q| return q.quote(),
+        }
+    }
+
     pub fn asSqlite(self: Typ) []const u8 {
         switch (self) {
             .unqualified => |u| return u.asSqlite(),
@@ -55,6 +63,13 @@ const Unqualified = enum {
             .xml => return "TEXT",
             .dataLink => return "BLOB",
             .none => return "",
+        }
+    }
+
+    fn quote(self: Unqualified) bool {
+        switch (self) {
+            .xml, .dataLink => return true,
+            _ => return false,
         }
     }
 };
@@ -119,6 +134,13 @@ const Qualified = struct {
             .clob, .varchar, .char, .nclob, .nvarchar, .nchar, .time, .timez, .timestamp, .timestampz => return "TEXT",
             .blob, .varbinary, .binary => return "BLOB",
             .none => return "",
+        }
+    }
+
+    fn quote(self: Qualified) bool {
+        switch (self) {
+            .decimal, .numeric, .float, .none => return false,
+            _ => return true,
         }
     }
 };

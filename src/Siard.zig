@@ -4,6 +4,8 @@ const Allocator = std.mem.Allocator;
 const Typ = @import("types.zig").Typ;
 const Siard = @This();
 
+const APO = 39;
+
 const SiardError = error{
     UnexpectedElement,
 };
@@ -39,8 +41,16 @@ pub fn deinit(self: *Siard, alloc: Allocator) void {
     alloc.destroy(self);
 }
 
-const metadataSchema =
+pub const metadataSchema =
     \\CREATE TABLE if not exists _metadata(dbname TEXT, dataOwner TEXT, dataOriginTimespan TEXT, lobFolder TEXT, producerApplication TEXT, archivalDate TEXT, messageDigest TEXT, clientMachine TEXT, databaseProduct TEXT, connection TEXT, databaseUser TEXT)
+;
+
+pub const tablesSchema =
+    \\CREATE TABLE if not exists _tables(id INTEGER, name TEXT, description TEXT)
+;
+
+pub const columnsSchema =
+    \\CREATE TABLE if not exists _columns(tableid INTEGER, name TEXT, originalType TEXT)
 ;
 
 const Metadata = struct {
@@ -76,11 +86,6 @@ const Metadata = struct {
         }
     }
 
-    pub fn sqlSchema(self: *Metadata) []const u8 {
-        _ = self;
-        return metadataSchema;
-    }
-
     pub fn sqlInsert(self: *Metadata, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "INSERT INTO _metadata VALUES (");
@@ -89,9 +94,9 @@ const Metadata = struct {
                 try list.appendSlice(alloc, ", ");
             }
             if (@field(self, nm)) |v| {
-                try list.append(alloc, 39);
+                try list.append(alloc, APO);
                 try list.appendSlice(alloc, v);
-                try list.append(alloc, 39);
+                try list.append(alloc, APO);
             } else {
                 try list.appendSlice(alloc, "NULL");
             }
@@ -143,6 +148,56 @@ const Schema = struct {
             tbl.deinit(alloc);
         }
         alloc.free(self.tables);
+    }
+
+    pub fn sqlInsertTbls(self: *Schema, alloc: Allocator) ![]const u8 {
+        var int_buf = [_]u8{0} ** 16;
+        var list = std.ArrayList(u8).empty;
+        try list.appendSlice(alloc, "INSERT INTO _tables VALUES ");
+        for (self.tables, 0..) |tbl, idx| {
+            if (idx == 0) {
+                try list.append(alloc, '(');
+            } else {
+                try list.appendSlice(alloc, ", (");
+            }
+            const l = std.fmt.printInt(int_buf[0..], idx, 10, std.fmt.Case.lower, .{});
+            try list.appendSlice(alloc, int_buf[0..l]);
+            try list.appendSlice(alloc, ", '");
+            try list.appendSlice(alloc, tbl.name);
+            try list.appendSlice(alloc, "', ");
+            if (tbl.description.len == 0) {
+                try list.appendSlice(alloc, "NULL");
+            } else {
+                try list.append(alloc, APO);
+                try list.appendSlice(alloc, tbl.description);
+                try list.append(alloc, APO);
+            }
+            try list.append(alloc, ')');
+        }
+        return list.toOwnedSlice(alloc);
+    }
+
+    pub fn sqlInsertCols(self: *Schema, alloc: Allocator) ![]const u8 {
+        var int_buf = [_]u8{0} ** 16;
+        var list = std.ArrayList(u8).empty;
+        try list.appendSlice(alloc, "INSERT INTO _columns VALUES ");
+        for (self.tables, 0..) |tbl, idx| {
+            const l = std.fmt.printInt(int_buf[0..], idx, 10, std.fmt.Case.lower, .{});
+            for (tbl.columns, 0..) |col, cidx| {
+                if (cidx == 0) {
+                    try list.append(alloc, '(');
+                } else {
+                    try list.appendSlice(alloc, ", (");
+                }
+                try list.appendSlice(alloc, int_buf[0..l]);
+                try list.appendSlice(alloc, ", '");
+                try list.appendSlice(alloc, col.name);
+                try list.appendSlice(alloc, "', '");
+                try list.appendSlice(alloc, col.typeOriginal);
+                try list.appendSlice(alloc, "')");
+            }
+        }
+        return list.toOwnedSlice(alloc);
     }
 };
 
