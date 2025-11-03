@@ -8,6 +8,7 @@ const APO = 39;
 
 const SiardError = error{
     UnexpectedElement,
+    EmptyTable,
 };
 
 metadata: Metadata,
@@ -118,6 +119,15 @@ fn getValue(
     return alloc.dupe(u8, std.mem.trim(u8, std.mem.span(xml.xmlNodeGetContent(el)), " \t\r\n"));
 }
 
+fn getSanitised(
+    alloc: Allocator,
+    el: xml.xmlNodePtr,
+) ![]const u8 {
+    const value = std.mem.span(xml.xmlNodeGetContent(el));
+    std.mem.replaceScalar(u8, value, ' ', '_');
+    return alloc.dupe(u8, value);
+}
+
 const Schema = struct {
     name: []const u8,
     folder: []const u8,
@@ -184,7 +194,7 @@ const Schema = struct {
         for (self.tables, 0..) |tbl, idx| {
             const l = std.fmt.printInt(int_buf[0..], idx, 10, std.fmt.Case.lower, .{});
             for (tbl.columns, 0..) |col, cidx| {
-                if (cidx == 0) {
+                if (idx == 0 and cidx == 0) {
                     try list.append(alloc, '(');
                 } else {
                     try list.appendSlice(alloc, ", (");
@@ -201,6 +211,10 @@ const Schema = struct {
     }
 };
 
+fn toIdx(name: []const u8) !usize {
+    return try std.fmt.parseInt(u8, name[1..], 10);
+}
+
 const Table = struct {
     name: []const u8,
     folder: []const u8,
@@ -213,7 +227,7 @@ const Table = struct {
     fn init(self: *Table, alloc: Allocator, table: xml.xmlNodePtr) !void {
         self.foreignKeys = null;
         var curr = try expect(xml.xmlFirstElementChild(table), "name");
-        self.name = try getValue(alloc, curr);
+        self.name = try getSanitised(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "folder");
         self.folder = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "description");
@@ -245,14 +259,7 @@ const Table = struct {
             }
         }
     }
-
-    // \\ CREATE TABLE if not exists track(
-    // \\   trackid     INTEGER,
-    // \\   trackname   TEXT,
-    // \\   trackartist INTEGER,
-    // \\   FOREIGN KEY(trackartist) REFERENCES artist(artistid)
-    // \\ )
-
+    // generate SQL CREATE TABLE statement
     pub fn sqlSchema(self: *Table, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "CREATE TABLE if not exists ");
@@ -292,6 +299,58 @@ const Table = struct {
             }
         }
         try list.append(alloc, ')');
+        return list.toOwnedSlice(alloc);
+    }
+    // generateSqlInsertStatement
+    pub fn sqlInsert(self: *Table, alloc: Allocator, doc: [*c]xml.xmlDoc) ![]const u8 {
+        if (self.rows == 0) {
+            return SiardError.EmptyTable;
+        }
+        var list = std.ArrayList(u8).empty;
+        try list.appendSlice(alloc, "INSERT INTO ");
+        try list.appendSlice(alloc, self.name);
+        try list.appendSlice(alloc, " VALUES ");
+        const root = xml.xmlDocGetRootElement(doc);
+        var row = xml.xmlFirstElementChild(root);
+        var firstRow: bool = true;
+
+        while (row != null) : (row = xml.xmlNextElementSibling(row)) {
+            if (firstRow) {
+                try list.append(alloc, '(');
+                firstRow = false;
+            } else {
+                try list.appendSlice(alloc, ", (");
+            }
+            var col = xml.xmlFirstElementChild(row);
+            var colIdx: usize = try toIdx(std.mem.span(col.*.name));
+            for (self.columns, 0..) |column, cidx| {
+                if (cidx > 0) {
+                    try list.appendSlice(alloc, ", ");
+                }
+                if (col == null or colIdx > cidx + 1) {
+                    try list.appendSlice(alloc, "NULL");
+                    continue;
+                }
+                const val: []u8 = std.mem.span(xml.xmlNodeGetContent(col));
+                std.mem.replaceScalar(u8, val, APO, '_');
+                if (val.len == 0) {
+                    try list.appendSlice(alloc, "NULL");
+                } else {
+                    if (column.typ.quote()) {
+                        try list.append(alloc, APO);
+                        try list.appendSlice(alloc, val);
+                        try list.append(alloc, APO);
+                    } else {
+                        try list.appendSlice(alloc, val);
+                    }
+                }
+                col = xml.xmlNextElementSibling(col);
+                if (col != null) {
+                    colIdx = try toIdx(std.mem.span(col.*.name));
+                }
+            }
+            try list.append(alloc, ')');
+        }
         return list.toOwnedSlice(alloc);
     }
 
@@ -378,7 +437,7 @@ const ForeignKey = struct {
         curr = try expect(xml.xmlNextElementSibling(curr), "referencedSchema");
         self.refschema = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "referencedTable");
-        self.reftable = try getValue(alloc, curr);
+        self.reftable = try getSanitised(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "reference");
         curr = try expect(xml.xmlFirstElementChild(curr), "column");
         self.column = try getValue(alloc, curr);

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<table
+  xmlns="http://www.admin.ch/xmlns/siard/1.0/schema0/table8.xsd"
+  xsi:schemaLocation="http://www.admin.ch/xmlns/siard/1.0/schema0/table8.xsd table8.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <row><c1>1</c1><c2>Exotic Liquids</c2><c3>Charlotte Cooper</c3><c4>Purchasing Manager</c4><c5>49 Gilbert St.</c5><c6>London</c6><c8>EC1 4SD</c8><c9>UK</c9><c10>(171) 555-2222</c10></row>
+  <row><c1>2</c1><c2>New Orleans Cajun Delights</c2><c3>Shelley Burke</c3><c4>Order Administrator</c4><c5>P.O. Box 78934</c5><c6>New Orleans</c6><c7>LA</c7><c8>70117</c8><c9>USA</c9><c10>(100) 555-4822</c10><c12>#CAJUN.HTM#</c12></row>
+  <row><c1>3</c1><c2>Grandma Kelly's Homestead</c2><c3>Regina Murphy</c3><c4>Sales Representative</c4><c5>707 Oxford Rd.</c5><c6>Ann Arbor</c6><c7>MI</c7><c8>48104</c8><c9>USA</c9><c10>(313) 555-5735</c10><c11>(313) 555-3349</c11></row>
+  <row><c1>4</c1><c2>Tokyo Traders</c2><c3>Yoshi Nagase</c3><c4>Marketing Manager</c4><c5>9-8 Sekimai Musashino-shi</c5><c6>Tokyo</c6><c8>100</c8><c9>Japan</c9><c10>(03) 3555-5011</c10></row>
+  <row><c1>5</c1><c2>Cooperativa de Quesos 'Las Cabras'</c2><c3>Antonio del Valle Saavedra</c3><c4>Export Administrator</c4><c5>Calle del Rosal 4</c5><c6>Oviedo</c6><c7>Asturias</c7><c8>33007</c8><c9>Spain</c9><c10>(98) 598 76 54</c10></row>
+  <row><c1>6</c1><c2>Mayumi's</c2><c3>Mayumi Ohno</c3><c4>Marketing Representative</c4><c5>92 Setsuko Chuo-ku</c5><c6>Osaka</c6><c8>545</c8><c9>Japan</c9><c10>(06) 431-7877</c10><c12>Mayumi's (on the World Wide Web)#http://www.microsoft.com/accessdev/sampleapps/mayumi.htm#</c12></row>
+  <row><c1>7</c1><c2>Pavlova, Ltd.</c2><c3>Ian Devling</c3><c4>Marketing Manager</c4><c5>74 Rose St. Moonie Ponds</c5><c6>Melbourne</c6><c7>Victoria</c7><c8>3058</c8><c9>Australia</c9><c10>(03) 444-2343</c10><c11>(03) 444-6588</c11></row>
+  <row><c1>8</c1><c2>Specialty Biscuits, Ltd.</c2><c3>Peter Wilson</c3><c4>Sales Representative</c4><c5>29 King's Way</c5><c6>Manchester</c6><c8>M14 GSD</c8><c9>UK</c9><c10>(161) 555-4448</c10></row>
+  <row><c1>9</c1><c2>PB Knäckebröd AB</c2><c3>Lars Peterson</c3><c4>Sales Agent</c4><c5>Kaloadagatan 13</c5><c6>Göteborg</c6><c8>S-345 67</c8><c9>Sweden</c9><c10>031-987 65 43</c10><c11>031-987 65 91</c11></row>
+  <row><c1>10</c1><c2>Refrescos Americanas LTDA</c2><c3>Carlos Diaz</c3><c4>Marketing Manager</c4><c5>Av. das Americanas 12.890</c5><c6>Sao Paulo</c6><c8>5442</c8><c9>Brazil</c9><c10>(11) 555 4640</c10></row>
+  <row><c1>11</c1><c2>Heli Süßwaren GmbH &amp; Co. KG</c2><c3>Petra Winkler</c3><c4>Sales Manager</c4><c5>Tiergartenstraße 5</c5><c6>Berlin</c6><c8>10785</c8><c9>Germany</c9><c10>(010) 9984510</c10></row>
+  <row><c1>12</c1><c2>Plutzer Lebensmittelgroßmärkte AG</c2><c3>Martin Bein</c3><c4>International Marketing Mgr.</c4><c5>Bogenallee 51</c5><c6>Frankfurt</c6><c8>60439</c8><c9>Germany</c9><c10>(069) 992755</c10><c12>Plutzer (on the World Wide Web)#http://www.microsoft.com/accessdev/sampleapps/plutzer.htm#</c12></row>
+  <row><c1>13</c1><c2>Nord-Ost-Fisch Handelsgesellschaft mbH</c2><c3>Sven Petersen</c3><c4>Coordinator Foreign Markets</c4><c5>Frahmredder 112a</c5><c6>Cuxhaven</c6><c8>27478</c8><c9>Germany</c9><c10>(04721) 8713</c10><c11>(04721) 8714</c11></row>
+  <row><c1>14</c1><c2>Formaggi Fortini s.r.l.</c2><c3>Elio Rossi</c3><c4>Sales Representative</c4><c5>Viale Dante, 75</c5><c6>Ravenna</c6><c8>48100</c8><c9>Italy</c9><c10>(0544) 60323</c10><c11>(0544) 60603</c11><c12>#FORMAGGI.HTM#</c12></row>
+  <row><c1>15</c1><c2>Norske Meierier</c2><c3>Beate Vileid</c3><c4>Marketing Manager</c4><c5>Hatlevegen 5</c5><c6>Sandvika</c6><c8>1320</c8><c9>Norway</c9><c10>(0)2-953010</c10></row>
+  <row><c1>16</c1><c2>Bigfoot Breweries</c2><c3>Cheryl Saylor</c3><c4>Regional Account Rep.</c4><c5>3400 - 8th Avenue Suite 210</c5><c6>Bend</c6><c7>OR</c7><c8>97101</c8><c9>USA</c9><c10>(503) 555-9931</c10></row>
+  <row><c1>17</c1><c2>Svensk Sjöföda AB</c2><c3>Michael Björn</c3><c4>Sales Representative</c4><c5>Brovallavägen 231</c5><c6>Stockholm</c6><c8>S-123 45</c8><c9>Sweden</c9><c10>08-123 45 67</c10></row>
+  <row><c1>18</c1><c2>Aux joyeux ecclésiastiques</c2><c3>Guylène Nodier</c3><c4>Sales Manager</c4><c5>203, Rue des Francs-Bourgeois</c5><c6>Paris</c6><c8>75004</c8><c9>France</c9><c10>(1) 03.83.00.68</c10><c11>(1) 03.83.00.62</c11></row>
+  <row><c1>19</c1><c2>New England Seafood Cannery</c2><c3>Robb Merchant</c3><c4>Wholesale Account Agent</c4><c5>Order Processing Dept. 2100 Paul Revere Blvd.</c5><c6>Boston</c6><c7>MA</c7><c8>02134</c8><c9>USA</c9><c10>(617) 555-3267</c10><c11>(617) 555-3389</c11></row>
+  <row><c1>20</c1><c2>Leka Trading</c2><c3>Chandra Leka</c3><c4>Owner</c4><c5>471 Serangoon Loop, Suite #402</c5><c6>Singapore</c6><c8>0512</c8><c9>Singapore</c9><c10>555-8787</c10></row>
+  <row><c1>21</c1><c2>Lyngbysild</c2><c3>Niels Petersen</c3><c4>Sales Manager</c4><c5>Lyngbysild Fiskebakken 10</c5><c6>Lyngby</c6><c8>2800</c8><c9>Denmark</c9><c10>43844108</c10><c11>43844115</c11></row>
+  <row><c1>22</c1><c2>Zaanse Snoepfabriek</c2><c3>Dirk Luchte</c3><c4>Accounting Manager</c4><c5>Verkoop Rijnweg 22</c5><c6>Zaandam</c6><c8>9999 ZZ</c8><c9>Netherlands</c9><c10>(12345) 1212</c10><c11>(12345) 1210</c11></row>
+  <row><c1>23</c1><c2>Karkki Oy</c2><c3>Anne Heikkonen</c3><c4>Product Manager</c4><c5>Valtakatu 12</c5><c6>Lappeenranta</c6><c8>53120</c8><c9>Finland</c9><c10>(953) 10956</c10></row>
+  <row><c1>24</c1><c2>G'day, Mate</c2><c3>Wendy Mackenzie</c3><c4>Sales Representative</c4><c5>170 Prince Edward Parade Hunter's Hill</c5><c6>Sydney</c6><c7>NSW</c7><c8>2042</c8><c9>Australia</c9><c10>(02) 555-5914</c10><c11>(02) 555-4873</c11><c12>G'day Mate (on the World Wide Web)#http://www.microsoft.com/accessdev/sampleapps/gdaymate.htm#</c12></row>
+  <row><c1>25</c1><c2>Ma Maison</c2><c3>Jean-Guy Lauzon</c3><c4>Marketing Manager</c4><c5>2960 Rue St. Laurent</c5><c6>Montréal</c6><c7>Québec</c7><c8>H1J 1C3</c8><c9>Canada</c9><c10>(514) 555-9022</c10></row>
+  <row><c1>26</c1><c2>Pasta Buttini s.r.l.</c2><c3>Giovanni Giudici</c3><c4>Order Administrator</c4><c5>Via dei Gelsomini, 153</c5><c6>Salerno</c6><c8>84100</c8><c9>Italy</c9><c10>(089) 6547665</c10><c11>(089) 6547667</c11></row>
+  <row><c1>27</c1><c2>Escargots Nouveaux</c2><c3>Marie Delamare</c3><c4>Sales Manager</c4><c5>22, rue H. Voiron</c5><c6>Montceau</c6><c8>71300</c8><c9>France</c9><c10>85.57.00.07</c10></row>
+  <row><c1>28</c1><c2>Gai pâturage</c2><c3>Eliane Noz</c3><c4>Sales Representative</c4><c5>Bat. B 3, rue des Alpes</c5><c6>Annecy</c6><c8>74000</c8><c9>France</c9><c10>38.76.98.06</c10><c11>38.76.98.58</c11></row>
+  <row><c1>29</c1><c2>Forêts d'érables</c2><c3>Chantal Goulet</c3><c4>Accounting Manager</c4><c5>148 rue Chasseur</c5><c6>Ste-Hyacinthe</c6><c7>Québec</c7><c8>J2S 7S8</c8><c9>Canada</c9><c10>(514) 555-2955</c10><c11>(514) 555-2921</c11></row>
+</table>

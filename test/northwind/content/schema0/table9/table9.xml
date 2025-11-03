@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<table
+  xmlns="http://www.admin.ch/xmlns/siard/1.0/schema0/table9.xsd"
+  xsi:schemaLocation="http://www.admin.ch/xmlns/siard/1.0/schema0/table9.xsd table9.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <row><c1>1</c1><c2>06897</c2></row>
+  <row><c1>1</c1><c2>19713</c2></row>
+  <row><c1>2</c1><c2>01581</c2></row>
+  <row><c1>2</c1><c2>01730</c2></row>
+  <row><c1>2</c1><c2>01833</c2></row>
+  <row><c1>2</c1><c2>02116</c2></row>
+  <row><c1>2</c1><c2>02139</c2></row>
+  <row><c1>2</c1><c2>02184</c2></row>
+  <row><c1>2</c1><c2>40222</c2></row>
+  <row><c1>3</c1><c2>30346</c2></row>
+  <row><c1>3</c1><c2>31406</c2></row>
+  <row><c1>3</c1><c2>32859</c2></row>
+  <row><c1>3</c1><c2>33607</c2></row>
+  <row><c1>4</c1><c2>20852</c2></row>
+  <row><c1>4</c1><c2>27403</c2></row>
+  <row><c1>4</c1><c2>27511</c2></row>
+  <row><c1>5</c1><c2>02903</c2></row>
+  <row><c1>5</c1><c2>07960</c2></row>
+  <row><c1>5</c1><c2>08837</c2></row>
+  <row><c1>5</c1><c2>10019</c2></row>
+  <row><c1>5</c1><c2>10038</c2></row>
+  <row><c1>5</c1><c2>11747</c2></row>
+  <row><c1>5</c1><c2>14450</c2></row>
+  <row><c1>6</c1><c2>85014</c2></row>
+  <row><c1>6</c1><c2>85251</c2></row>
+  <row><c1>6</c1><c2>98004</c2></row>
+  <row><c1>6</c1><c2>98052</c2></row>
+  <row><c1>6</c1><c2>98104</c2></row>
+  <row><c1>7</c1><c2>60179</c2></row>
+  <row><c1>7</c1><c2>60601</c2></row>
+  <row><c1>7</c1><c2>80202</c2></row>
+  <row><c1>7</c1><c2>80909</c2></row>
+  <row><c1>7</c1><c2>90405</c2></row>
+  <row><c1>7</c1><c2>94025</c2></row>
+  <row><c1>7</c1><c2>94105</c2></row>
+  <row><c1>7</c1><c2>95008</c2></row>
+  <row><c1>7</c1><c2>95054</c2></row>
+  <row><c1>7</c1><c2>95060</c2></row>
+  <row><c1>8</c1><c2>19428</c2></row>
+  <row><c1>8</c1><c2>44122</c2></row>
+  <row><c1>8</c1><c2>45839</c2></row>
+  <row><c1>8</c1><c2>53404</c2></row>
+  <row><c1>9</c1><c2>03049</c2></row>
+  <row><c1>9</c1><c2>03801</c2></row>
+  <row><c1>9</c1><c2>48075</c2></row>
+  <row><c1>9</c1><c2>48084</c2></row>
+  <row><c1>9</c1><c2>48304</c2></row>
+  <row><c1>9</c1><c2>55113</c2></row>
+  <row><c1>9</c1><c2>55439</c2></row>
+</table>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<table
+  xmlns="http://www.admin.ch/xmlns/siard/1.0/schema0/table1.xsd"
+  xsi:schemaLocation="http://www.admin.ch/xmlns/siard/1.0/schema0/table1.xsd table1.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <row><c1>1</c1><c2>Chai</c2><c3>1</c3><c4>1</c4><c5>10 boxes x 20 bags</c5><c6>18.0000</c6><c7>39</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>2</c1><c2>Chang</c2><c3>1</c3><c4>1</c4><c5>24 - 12 oz bottles</c5><c6>19.0000</c6><c7>17</c7><c8>40</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>3</c1><c2>Aniseed Syrup</c2><c3>1</c3><c4>2</c4><c5>12 - 550 ml bottles</c5><c6>10.0000</c6><c7>13</c7><c8>70</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>4</c1><c2>Chef Anton's Cajun Seasoning</c2><c3>2</c3><c4>2</c4><c5>48 - 6 oz jars</c5><c6>22.0000</c6><c7>53</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>5</c1><c2>Chef Anton's Gumbo Mix</c2><c3>2</c3><c4>2</c4><c5>36 boxes</c5><c6>21.3500</c6><c7>0</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>6</c1><c2>Grandma's Boysenberry Spread</c2><c3>3</c3><c4>2</c4><c5>12 - 8 oz jars</c5><c6>25.0000</c6><c7>120</c7><c8>0</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>7</c1><c2>Uncle Bob's Organic Dried Pears</c2><c3>3</c3><c4>7</c4><c5>12 - 1 lb pkgs.</c5><c6>30.0000</c6><c7>15</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>8</c1><c2>Northwoods Cranberry Sauce</c2><c3>3</c3><c4>2</c4><c5>12 - 12 oz jars</c5><c6>40.0000</c6><c7>6</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>9</c1><c2>Mishi Kobe Niku</c2><c3>4</c3><c4>6</c4><c5>18 - 500 g pkgs.</c5><c6>97.0000</c6><c7>29</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>10</c1><c2>Ikura</c2><c3>4</c3><c4>8</c4><c5>12 - 200 ml jars</c5><c6>31.0000</c6><c7>31</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>11</c1><c2>Queso Cabrales</c2><c3>5</c3><c4>4</c4><c5>1 kg pkg.</c5><c6>21.0000</c6><c7>22</c7><c8>30</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>12</c1><c2>Queso Manchego La Pastora</c2><c3>5</c3><c4>4</c4><c5>10 - 500 g pkgs.</c5><c6>38.0000</c6><c7>86</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>13</c1><c2>Konbu</c2><c3>6</c3><c4>8</c4><c5>2 kg box</c5><c6>6.0000</c6><c7>24</c7><c8>0</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>14</c1><c2>Tofu</c2><c3>6</c3><c4>7</c4><c5>40 - 100 g pkgs.</c5><c6>23.2500</c6><c7>35</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>15</c1><c2>Genen Shouyu</c2><c3>6</c3><c4>2</c4><c5>24 - 250 ml bottles</c5><c6>15.5000</c6><c7>39</c7><c8>0</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>16</c1><c2>Pavlova</c2><c3>7</c3><c4>3</c4><c5>32 - 500 g boxes</c5><c6>17.4500</c6><c7>29</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>17</c1><c2>Alice Mutton</c2><c3>7</c3><c4>6</c4><c5>20 - 1 kg tins</c5><c6>39.0000</c6><c7>0</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>18</c1><c2>Carnarvon Tigers</c2><c3>7</c3><c4>8</c4><c5>16 kg pkg.</c5><c6>62.5000</c6><c7>42</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>19</c1><c2>Teatime Chocolate Biscuits</c2><c3>8</c3><c4>3</c4><c5>10 boxes x 12 pieces</c5><c6>9.2000</c6><c7>25</c7><c8>0</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>20</c1><c2>Sir Rodney's Marmalade</c2><c3>8</c3><c4>3</c4><c5>30 gift boxes</c5><c6>81.0000</c6><c7>40</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>21</c1><c2>Sir Rodney's Scones</c2><c3>8</c3><c4>3</c4><c5>24 pkgs. x 4 pieces</c5><c6>10.0000</c6><c7>3</c7><c8>40</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>22</c1><c2>Gustaf's Knäckebröd</c2><c3>9</c3><c4>5</c4><c5>24 - 500 g pkgs.</c5><c6>21.0000</c6><c7>104</c7><c8>0</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>23</c1><c2>Tunnbröd</c2><c3>9</c3><c4>5</c4><c5>12 - 250 g pkgs.</c5><c6>9.0000</c6><c7>61</c7><c8>0</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>24</c1><c2>Guaraná Fantástica</c2><c3>10</c3><c4>1</c4><c5>12 - 355 ml cans</c5><c6>4.5000</c6><c7>20</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>25</c1><c2>NuNuCa Nuß-Nougat-Creme</c2><c3>11</c3><c4>3</c4><c5>20 - 450 g glasses</c5><c6>14.0000</c6><c7>76</c7><c8>0</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>26</c1><c2>Gumbär Gummibärchen</c2><c3>11</c3><c4>3</c4><c5>100 - 250 g bags</c5><c6>31.2300</c6><c7>15</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>27</c1><c2>Schoggi Schokolade</c2><c3>11</c3><c4>3</c4><c5>100 - 100 g pieces</c5><c6>43.9000</c6><c7>49</c7><c8>0</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>28</c1><c2>Rössle Sauerkraut</c2><c3>12</c3><c4>7</c4><c5>25 - 825 g cans</c5><c6>45.6000</c6><c7>26</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>29</c1><c2>Thüringer Rostbratwurst</c2><c3>12</c3><c4>6</c4><c5>50 bags x 30 sausgs.</c5><c6>123.7900</c6><c7>0</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>30</c1><c2>Nord-Ost Matjeshering</c2><c3>13</c3><c4>8</c4><c5>10 - 200 g glasses</c5><c6>25.8900</c6><c7>10</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>31</c1><c2>Gorgonzola Telino</c2><c3>14</c3><c4>4</c4><c5>12 - 100 g pkgs</c5><c6>12.5000</c6><c7>0</c7><c8>70</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>32</c1><c2>Mascarpone Fabioli</c2><c3>14</c3><c4>4</c4><c5>24 - 200 g pkgs.</c5><c6>32.0000</c6><c7>9</c7><c8>40</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>33</c1><c2>Geitost</c2><c3>15</c3><c4>4</c4><c5>500 g</c5><c6>2.5000</c6><c7>112</c7><c8>0</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>34</c1><c2>Sasquatch Ale</c2><c3>16</c3><c4>1</c4><c5>24 - 12 oz bottles</c5><c6>14.0000</c6><c7>111</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>35</c1><c2>Steeleye Stout</c2><c3>16</c3><c4>1</c4><c5>24 - 12 oz bottles</c5><c6>18.0000</c6><c7>20</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>36</c1><c2>Inlagd Sill</c2><c3>17</c3><c4>8</c4><c5>24 - 250 g \u0020jars</c5><c6>19.0000</c6><c7>112</c7><c8>0</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>37</c1><c2>Gravad lax</c2><c3>17</c3><c4>8</c4><c5>12 - 500 g pkgs.</c5><c6>26.0000</c6><c7>11</c7><c8>50</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>38</c1><c2>Côte de Blaye</c2><c3>18</c3><c4>1</c4><c5>12 - 75 cl bottles</c5><c6>263.5000</c6><c7>17</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>39</c1><c2>Chartreuse verte</c2><c3>18</c3><c4>1</c4><c5>750 cc per bottle</c5><c6>18.0000</c6><c7>69</c7><c8>0</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>40</c1><c2>Boston Crab Meat</c2><c3>19</c3><c4>8</c4><c5>24 - 4 oz tins</c5><c6>18.4000</c6><c7>123</c7><c8>0</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>41</c1><c2>Jack's New England Clam Chowder</c2><c3>19</c3><c4>8</c4><c5>12 - 12 oz cans</c5><c6>9.6500</c6><c7>85</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>42</c1><c2>Singaporean Hokkien Fried Mee</c2><c3>20</c3><c4>5</c4><c5>32 - 1 kg pkgs.</c5><c6>14.0000</c6><c7>26</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>43</c1><c2>Ipoh Coffee</c2><c3>20</c3><c4>1</c4><c5>16 - 500 g tins</c5><c6>46.0000</c6><c7>17</c7><c8>10</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>44</c1><c2>Gula Malacca</c2><c3>20</c3><c4>2</c4><c5>20 - 2 kg bags</c5><c6>19.4500</c6><c7>27</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>45</c1><c2>Rogede sild</c2><c3>21</c3><c4>8</c4><c5>1k pkg.</c5><c6>9.5000</c6><c7>5</c7><c8>70</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>46</c1><c2>Spegesild</c2><c3>21</c3><c4>8</c4><c5>4 - 450 g glasses</c5><c6>12.0000</c6><c7>95</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>47</c1><c2>Zaanse koeken</c2><c3>22</c3><c4>3</c4><c5>10 - 4 oz boxes</c5><c6>9.5000</c6><c7>36</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>48</c1><c2>Chocolade</c2><c3>22</c3><c4>3</c4><c5>10 pkgs.</c5><c6>12.7500</c6><c7>15</c7><c8>70</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>49</c1><c2>Maxilaku</c2><c3>23</c3><c4>3</c4><c5>24 - 50 g pkgs.</c5><c6>20.0000</c6><c7>10</c7><c8>60</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>50</c1><c2>Valkoinen suklaa</c2><c3>23</c3><c4>3</c4><c5>12 - 100 g bars</c5><c6>16.2500</c6><c7>65</c7><c8>0</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>51</c1><c2>Manjimup Dried Apples</c2><c3>24</c3><c4>7</c4><c5>50 - 300 g pkgs.</c5><c6>53.0000</c6><c7>20</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>52</c1><c2>Filo Mix</c2><c3>24</c3><c4>5</c4><c5>16 - 2 kg boxes</c5><c6>7.0000</c6><c7>38</c7><c8>0</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>53</c1><c2>Perth Pasties</c2><c3>24</c3><c4>6</c4><c5>48 pieces</c5><c6>32.8000</c6><c7>0</c7><c8>0</c8><c9>0</c9><c10>true</c10></row>
+  <row><c1>54</c1><c2>Tourtière</c2><c3>25</c3><c4>6</c4><c5>16 pies</c5><c6>7.4500</c6><c7>21</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>55</c1><c2>Pâté chinois</c2><c3>25</c3><c4>6</c4><c5>24 boxes x 2 pies</c5><c6>24.0000</c6><c7>115</c7><c8>0</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>56</c1><c2>Gnocchi di nonna Alice</c2><c3>26</c3><c4>5</c4><c5>24 - 250 g pkgs.</c5><c6>38.0000</c6><c7>21</c7><c8>10</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>57</c1><c2>Ravioli Angelo</c2><c3>26</c3><c4>5</c4><c5>24 - 250 g pkgs.</c5><c6>19.5000</c6><c7>36</c7><c8>0</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>58</c1><c2>Escargots de Bourgogne</c2><c3>27</c3><c4>8</c4><c5>24 pieces</c5><c6>13.2500</c6><c7>62</c7><c8>0</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>59</c1><c2>Raclette Courdavault</c2><c3>28</c3><c4>4</c4><c5>5 kg pkg.</c5><c6>55.0000</c6><c7>79</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>60</c1><c2>Camembert Pierrot</c2><c3>28</c3><c4>4</c4><c5>15 - 300 g rounds</c5><c6>34.0000</c6><c7>19</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>61</c1><c2>Sirop d'érable</c2><c3>29</c3><c4>2</c4><c5>24 - 500 ml bottles</c5><c6>28.5000</c6><c7>113</c7><c8>0</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>62</c1><c2>Tarte au sucre</c2><c3>29</c3><c4>3</c4><c5>48 pies</c5><c6>49.3000</c6><c7>17</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>63</c1><c2>Vegie-spread</c2><c3>7</c3><c4>2</c4><c5>15 - 625 g jars</c5><c6>43.9000</c6><c7>24</c7><c8>0</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>64</c1><c2>Wimmers gute Semmelknödel</c2><c3>12</c3><c4>5</c4><c5>20 bags x 4 pieces</c5><c6>33.2500</c6><c7>22</c7><c8>80</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>65</c1><c2>Louisiana Fiery Hot Pepper Sauce</c2><c3>2</c3><c4>2</c4><c5>32 - 8 oz bottles</c5><c6>21.0500</c6><c7>76</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>66</c1><c2>Louisiana Hot Spiced Okra</c2><c3>2</c3><c4>2</c4><c5>24 - 8 oz jars</c5><c6>17.0000</c6><c7>4</c7><c8>100</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>67</c1><c2>Laughing Lumberjack Lager</c2><c3>16</c3><c4>1</c4><c5>24 - 12 oz bottles</c5><c6>14.0000</c6><c7>52</c7><c8>0</c8><c9>10</c9><c10>false</c10></row>
+  <row><c1>68</c1><c2>Scottish Longbreads</c2><c3>8</c3><c4>3</c4><c5>10 boxes x 8 pieces</c5><c6>12.5000</c6><c7>6</c7><c8>10</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>69</c1><c2>Gudbrandsdalsost</c2><c3>15</c3><c4>4</c4><c5>10 kg pkg.</c5><c6>36.0000</c6><c7>26</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+  <row><c1>70</c1><c2>Outback Lager</c2><c3>7</c3><c4>1</c4><c5>24 - 355 ml bottles</c5><c6>15.0000</c6><c7>15</c7><c8>10</c8><c9>30</c9><c10>false</c10></row>
+  <row><c1>71</c1><c2>Flotemysost</c2><c3>15</c3><c4>4</c4><c5>10 - 500 g pkgs.</c5><c6>21.5000</c6><c7>26</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>72</c1><c2>Mozzarella di Giovanni</c2><c3>14</c3><c4>4</c4><c5>24 - 200 g pkgs.</c5><c6>34.8000</c6><c7>14</c7><c8>0</c8><c9>0</c9><c10>false</c10></row>
+  <row><c1>73</c1><c2>Röd Kaviar</c2><c3>17</c3><c4>8</c4><c5>24 - 150 g jars</c5><c6>15.0000</c6><c7>101</c7><c8>0</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>74</c1><c2>Longlife Tofu</c2><c3>4</c3><c4>7</c4><c5>5 kg pkg.</c5><c6>10.0000</c6><c7>4</c7><c8>20</c8><c9>5</c9><c10>false</c10></row>
+  <row><c1>75</c1><c2>Rhönbräu Klosterbier</c2><c3>12</c3><c4>1</c4><c5>24 - 0.5 l bottles</c5><c6>7.7500</c6><c7>125</c7><c8>0</c8><c9>25</c9><c10>false</c10></row>
+  <row><c1>76</c1><c2>Lakkalikööri</c2><c3>23</c3><c4>1</c4><c5>500 ml</c5><c6>18.0000</c6><c7>57</c7><c8>0</c8><c9>20</c9><c10>false</c10></row>
+  <row><c1>77</c1><c2>Original Frankfurter grüne Soße</c2><c3>12</c3><c4>2</c4><c5>12 boxes</c5><c6>13.0000</c6><c7>32</c7><c8>0</c8><c9>15</c9><c10>false</c10></row>
+</table>

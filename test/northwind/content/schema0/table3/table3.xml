@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<table
+  xmlns="http://www.admin.ch/xmlns/siard/1.0/schema0/table3.xsd"
+  xsi:schemaLocation="http://www.admin.ch/xmlns/siard/1.0/schema0/table3.xsd table3.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <row><c1>1</c1><c2>Speedy Express</c2><c3>(503) 555-9831</c3></row>
+  <row><c1>2</c1><c2>United Package</c2><c3>(503) 555-3199</c3></row>
+  <row><c1>3</c1><c2>Federal Shipping</c2><c3>(503) 555-9931</c3></row>
+</table>

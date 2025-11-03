@@ -39,7 +39,23 @@ const Unqualified = enum {
     integer, // INTEGER, INT xs:integer
     real, // REAL xs:float
     smallInt, // SMALLINT xs:integer
-    xml, // XML clobType11
+    xml,
+    blob, // BINARY LARGE OBJECT(...), BLOB(...) blobType12
+    varbinary, // BINARY VARYING(...), VARBINARY(...) xs:hexBinary / clobType13
+    binary, // BINARY(…) xs:hexBinary / blobType13
+    clob, // CHARACTER LARGE OBJECT(...), CLOB(...) clobType13
+    varchar, // CHARACTER VARYING(...), CHAR VARYING(...), VARCHAR(...) xs:string / clobType13
+    char, // CHARACTER(...), CHAR(...) xs:string / clobType13
+    decimal, // DECIMAL(...), DEC(...) xs:decimal
+    float, // FLOAT(p) xs:double
+    nclob, // NATIONAL CHARACTER LARGE OBJECT(...), NCHAR LARGE OBJECT(...), NCLOB(...) clobType13
+    nvarchar, // NATIONAL CHARACTER VARYING(...), NATIONAL CHAR VARYING(...), NCHAR VARYING(...) xs:string / clobType13
+    nchar, // NATIONAL CHARACTER(...), NCHAR(...), NATIONAL CHAR(...), xs:string / clobType13
+    numeric, // NUMERIC(...) xs:decimal
+    time, // TIME(...) timeType
+    timez, // TIME WITH TIME ZONE(...) timeType
+    timestamp, // TIMESTAMP(...) dateTimeType
+    timestampz, // XML clobType11
     none,
 
     fn fromStr(str: []u8) Unqualified {
@@ -52,24 +68,39 @@ const Unqualified = enum {
         if (std.mem.eql(u8, str, "REAL")) return .real;
         if (std.mem.eql(u8, str, "SMALLINT")) return .smallInt;
         if (std.mem.eql(u8, str, "XML")) return .xml;
+        if (std.mem.eql(u8, str, "BINARY LARGE OBJECT") or std.mem.eql(u8, str, "BLOB")) return .blob;
+        if (std.mem.eql(u8, str, "BINARY VARYING") or std.mem.eql(u8, str, "VARBINARY")) return .varbinary;
+        if (std.mem.eql(u8, str, "BINARY")) return .binary;
+        if (std.mem.eql(u8, str, "CHARACTER LARGE OBJECT") or std.mem.eql(u8, str, "CLOB")) return .clob;
+        if (std.mem.eql(u8, str, "CHARACTER VARYING") or std.mem.eql(u8, str, "CHAR VARYING") or std.mem.eql(u8, str, "VARCHAR")) return .varchar;
+        if (std.mem.eql(u8, str, "DECIMAL") or std.mem.eql(u8, str, "DEC")) return .decimal;
+        if (std.mem.eql(u8, str, "FLOAT")) return .float;
+        if (std.mem.eql(u8, str, "NATIONAL CHARACTER LARGE OBJECT") or std.mem.eql(u8, str, "NCHAR LARGE OBJECT") or std.mem.eql(u8, str, "NCLOB")) return .nclob;
+        if (std.mem.eql(u8, str, "NATIONAL CHARACTER VARYING") or std.mem.eql(u8, str, "NATIONAL CHAR VARYING") or std.mem.eql(u8, str, "NCHAR VARYING")) return .nvarchar;
+        if (std.mem.eql(u8, str, "NATIONAL CHARACTER") or std.mem.eql(u8, str, "NCHAR") or std.mem.eql(u8, str, "NATIONAL CHAR")) return .nchar;
+        if (std.mem.eql(u8, str, "NUMERIC")) return .float;
+        if (std.mem.eql(u8, str, "TIME")) return .time;
+        if (std.mem.eql(u8, str, "TIME WITH TIME ZONE")) return .timez;
+        if (std.mem.eql(u8, str, "TIMESTAMP")) return .timestamp;
+        if (std.mem.eql(u8, str, "TIMESTAMP WITH TIME ZONE")) return .timestampz;
         return .none;
     }
 
     fn asSqlite(self: Unqualified) []const u8 {
         switch (self) {
             .bigInt, .integer, .smallInt => return "INTEGER",
-            .boolean, .date => return "NUMERIC",
-            .real, .double => return "REAL",
-            .xml => return "TEXT",
-            .dataLink => return "BLOB",
+            .boolean, .date, .decimal, .numeric => return "NUMERIC",
+            .real, .double, .float => return "REAL",
+            .blob, .varbinary, .binary, .dataLink => return "BLOB",
+            .xml, .clob, .varchar, .char, .nclob, .nvarchar, .nchar, .time, .timez, .timestamp, .timestampz => return "TEXT",
             .none => return "",
         }
     }
 
     fn quote(self: Unqualified) bool {
         switch (self) {
-            .xml, .dataLink => return true,
-            _ => return false,
+            .blob, .varbinary, .binary, .dataLink, .xml, .clob, .varchar, .char, .nclob, .nvarchar, .nchar, .time, .timez, .timestamp, .timestampz => return true,
+            else => return false,
         }
     }
 };
@@ -98,7 +129,7 @@ const QualType = enum {
         if (std.mem.startsWith(u8, str, "BINARY VARYING(") or std.mem.startsWith(u8, str, "VARBINARY(")) return .varbinary;
         if (std.mem.startsWith(u8, str, "BINARY(")) return .binary;
         if (std.mem.startsWith(u8, str, "CHARACTER LARGE OBJECT(") or std.mem.startsWith(u8, str, "CLOB(")) return .clob;
-        if (std.mem.startsWith(u8, str, "CHARACTER VARYING(") or std.mem.startsWith(u8, str, "CHAR VARYING") or std.mem.startsWith(u8, str, "VARCHAR(")) return .varchar;
+        if (std.mem.startsWith(u8, str, "CHARACTER VARYING(") or std.mem.startsWith(u8, str, "CHAR VARYING(") or std.mem.startsWith(u8, str, "VARCHAR(")) return .varchar;
         if (std.mem.startsWith(u8, str, "DECIMAL(") or std.mem.startsWith(u8, str, "DEC(")) return .decimal;
         if (std.mem.startsWith(u8, str, "FLOAT(")) return .float;
         if (std.mem.startsWith(u8, str, "NATIONAL CHARACTER LARGE OBJECT(") or std.mem.startsWith(u8, str, "NCHAR LARGE OBJECT(") or std.mem.startsWith(u8, str, "NCLOB(")) return .nclob;
@@ -138,9 +169,9 @@ const Qualified = struct {
     }
 
     fn quote(self: Qualified) bool {
-        switch (self) {
+        switch (self.typ) {
             .decimal, .numeric, .float, .none => return false,
-            _ => return true,
+            else => return true,
         }
     }
 };

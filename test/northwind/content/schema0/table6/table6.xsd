@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.admin.ch/xmlns/siard/1.0/schema0/table6.xsd" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.admin.ch/xmlns/siard/1.0/schema0/table6.xsd">
+  <xs:element name="table">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="row" type="rowType">
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="rowType">
+    <xs:sequence>
+      <xs:element name="c1" type="xs:string"/>
+      <xs:element minOccurs="0" name="c2" type="clobType"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="clobType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="file" type="xs:string"/>
+        <xs:attribute name="length" type="xs:integer"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:schema>
