@@ -1,18 +1,13 @@
 const std = @import("std");
 const squadc = @import("squadc");
 
-pub fn main(init: std.process.Init.Minimal) !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
-
-    var args = try std.process.Args.iterateAllocator(init.args, allocator);
-    //.argsWithAllocator(allocator);
-    defer args.deinit();
+pub fn main(init: std.process.Init) !void {
+    var args = try init.minimal.args.iterateAllocator(init.gpa);
     _ = args.next();
     const path = args.next() orelse {
         std.debug.print("Usage: squadc FILE.siard (please provide a siard file)", .{});
         return;
     };
-    try squadc.convert(allocator, path);
+    args.deinit();
+    try squadc.convert(init.gpa, path);
 }
