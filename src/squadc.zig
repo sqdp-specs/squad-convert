@@ -128,10 +128,10 @@ test "sqlite" {
         try std.testing.expectEqualStrings("Ghanima", row.text(0));
     }
     conn.close();
-    try std.fs.cwd().deleteFile("test.squad");
+    try std.Io.Dir.cwd().deleteFile(std.testing.io, "test.squad");
 }
 
 test "convert" {
     try convert(std.testing.allocator, example);
-    try std.fs.cwd().deleteFile("northwind.squad");
+    try std.Io.Dir.cwd().deleteFile(std.testing.io, "northwind.squad");
 }

@@ -2,7 +2,7 @@
     .name = .squadc,
     .version = "0.0.0",
     .fingerprint = 0x3818784b509c72c4,
-    .minimum_zig_version = "0.15.2",
+    .minimum_zig_version = "0.16.0-dev.2535+b5bd49460",
     .dependencies = .{
         .libxml2 = .{
             .url = "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.13.5/libxml2-v2.13.5.tar.gz",
@@ -14,8 +14,8 @@
             .lazy = false,
         },
         .zqlite = .{
-            .url = "git+https://github.com/karlseguin/zqlite.zig?ref=master#74e661633ffe04fadc214ad07857633fa339f79c",
-            .hash = "zqlite-0.0.0-RWLaY81-lQAbR_uUQJeKmTzYi16C9Zvl-BjrBOavQfeK",
+            .url = "git+https://github.com/karlseguin/zqlite.zig?ref=dev#205dcc49a212b27e5a78868cda09135d0945fc7a",
+            .hash = "zqlite-0.0.1-RWLaY36cmAC0Sznz0iy75CjxMjGCkUjZzIa-Si2pitGe",
         },
     },
     .paths = .{

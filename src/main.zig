@@ -1,12 +1,13 @@
 const std = @import("std");
 const squadc = @import("squadc");
 
-pub fn main() !void {
+pub fn main(init: std.process.Init.Minimal) !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var args = try std.process.argsWithAllocator(allocator);
+    var args = try std.process.Args.iterateAllocator(init.args, allocator);
+    //.argsWithAllocator(allocator);
     defer args.deinit();
     _ = args.next();
     const path = args.next() orelse {
