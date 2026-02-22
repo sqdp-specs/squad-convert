@@ -6,9 +6,12 @@ const Siard = @This();
 
 const APO = 39;
 
+const NULL = "NULL";
+
 const SiardError = error{
     UnexpectedElement,
     EmptyTable,
+    BadIndex,
 };
 
 metadata: Metadata,
@@ -54,6 +57,22 @@ pub const columnsSchema =
     \\CREATE TABLE if not exists _columns(tableid INTEGER, name TEXT, originalType TEXT)
 ;
 
+// generates a placeholder string like (?, ?, ?). Caller owns the memory.
+fn placeholders(alloc: Allocator, count: u8) ![]const u8 {
+    var list = std.ArrayList(u8).empty;
+    try list.append(alloc, '(');
+    var idx: u8 = 0;
+    while (idx < count) {
+        if (idx > 0) {
+            try list.appendSlice(alloc, ", ");
+        }
+        try list.append(alloc, '?');
+        idx += 1;
+    }
+    try list.append(alloc, ')');
+    return list.toOwnedSlice(alloc);
+}
+
 const Metadata = struct {
     dbname: ?[]const u8 = null,
     dataOwner: ?[]const u8 = null,
@@ -89,37 +108,47 @@ const Metadata = struct {
 
     pub fn sqlInsert(self: *Metadata, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
-        try list.appendSlice(alloc, "INSERT INTO _metadata VALUES (");
-        inline for (comptime std.meta.fieldNames(@TypeOf(self.*)), 0..) |nm, idx| {
-            if (idx > 0) {
-                try list.appendSlice(alloc, ", ");
-            }
+        try list.appendSlice(alloc, "INSERT INTO _metadata VALUES ");
+        const plc = try placeholders(alloc, @truncate(std.meta.fieldNames(@TypeOf(self.*)).len));
+        defer alloc.free(plc);
+        try list.appendSlice(alloc, plc);
+        return list.toOwnedSlice(alloc);
+    }
+
+    pub fn sqlValues(self: *Metadata, alloc: Allocator) ![][]const u8 {
+        var list = std.ArrayList([]const u8).empty;
+        inline for (comptime std.meta.fieldNames(@TypeOf(self.*))) |nm| {
             if (@field(self, nm)) |v| {
-                try list.append(alloc, APO);
-                try list.appendSlice(alloc, v);
-                try list.append(alloc, APO);
+                const vals = try alloc.dupe(u8, v);
+                try list.append(alloc, vals);
             } else {
-                try list.appendSlice(alloc, "NULL");
+                const n = try alloc.dupe(u8, NULL);
+                try list.append(alloc, n);
             }
         }
-        try list.append(alloc, ')');
         return list.toOwnedSlice(alloc);
     }
 };
+
+fn optional(el: xml.xmlNodePtr, opt: []const u8) xml.xmlNodePtr {
+    var curr = el;
+    while (curr != null and expect(curr, opt) == SiardError.UnexpectedElement) : (curr = xml.xmlNextElementSibling(curr)) {}
+    return curr;
+}
 
 fn expect(el: xml.xmlNodePtr, exp: []const u8) !xml.xmlNodePtr {
     if (!std.mem.eql(u8, std.mem.span(el.*.name), exp)) return SiardError.UnexpectedElement;
     return el;
 }
 
-fn getValue(
-    alloc: Allocator,
-    el: xml.xmlNodePtr,
-) ![]const u8 {
-    return alloc.dupe(u8, std.mem.trim(u8, std.mem.span(xml.xmlNodeGetContent(el)), " \t\r\n"));
-}
+// fn getValue(
+//     alloc: Allocator,
+//     el: xml.xmlNodePtr,
+// ) ![]const u8 {
+//     return alloc.dupe(u8, std.mem.trim(u8, std.mem.span(xml.xmlNodeGetContent(el)), " \t\r\n"));
+// }
 
-fn getSanitised(
+fn getValue(
     alloc: Allocator,
     el: xml.xmlNodePtr,
 ) ![]const u8 {
@@ -131,7 +160,7 @@ fn getSanitised(
 const Schema = struct {
     name: []const u8,
     folder: []const u8,
-    tables: []Table,
+    tables: ?[]Table,
     //views: []View, TODO
     //routines: []Routine, TODO
 
@@ -140,73 +169,83 @@ const Schema = struct {
         self.name = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "folder");
         self.folder = try getValue(alloc, curr);
-        curr = try expect(xml.xmlNextElementSibling(curr), "tables");
+        curr = optional(curr, "tables");
+        if (curr == null) return;
         const table_count: usize = xml.xmlChildElementCount(curr);
         self.tables = try alloc.alloc(Table, table_count);
         var idx: usize = 0;
         var tbl = curr;
         while (idx < table_count) : (idx += 1) {
             tbl = if (idx == 0) try expect(xml.xmlFirstElementChild(tbl), "table") else try expect(xml.xmlNextElementSibling(tbl), "table");
-            try self.tables[idx].init(alloc, tbl);
+            try self.tables.?[idx].init(alloc, tbl);
         }
     }
 
     fn deinit(self: *Schema, alloc: Allocator) void {
         alloc.free(self.name);
         alloc.free(self.folder);
-        for (self.tables) |*tbl| {
-            tbl.deinit(alloc);
+        if (self.tables) |tables| {
+            for (tables) |*tbl| {
+                tbl.deinit(alloc);
+            }
+            alloc.free(tables);
         }
-        alloc.free(self.tables);
     }
 
-    pub fn sqlInsertTbls(self: *Schema, alloc: Allocator) ![]const u8 {
-        var int_buf = [_]u8{0} ** 16;
+    pub fn sqlInsertTbls(_: *Schema, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "INSERT INTO _tables VALUES ");
-        for (self.tables, 0..) |tbl, idx| {
-            if (idx == 0) {
-                try list.append(alloc, '(');
-            } else {
-                try list.appendSlice(alloc, ", (");
-            }
-            const l = std.fmt.printInt(int_buf[0..], idx, 10, std.fmt.Case.lower, .{});
-            try list.appendSlice(alloc, int_buf[0..l]);
-            try list.appendSlice(alloc, ", '");
-            try list.appendSlice(alloc, tbl.name);
-            try list.appendSlice(alloc, "', ");
-            if (tbl.description.len == 0) {
-                try list.appendSlice(alloc, "NULL");
-            } else {
-                try list.append(alloc, APO);
-                try list.appendSlice(alloc, tbl.description);
-                try list.append(alloc, APO);
-            }
-            try list.append(alloc, ')');
-        }
+        const plc = try placeholders(alloc, 3);
+        defer alloc.free(plc);
+        try list.appendSlice(alloc, plc);
         return list.toOwnedSlice(alloc);
     }
 
-    pub fn sqlInsertCols(self: *Schema, alloc: Allocator) ![]const u8 {
+    pub fn sqlInsertTblVals(self: *Schema, alloc: Allocator, idx: usize) ![][]const u8 {
+        const tables = self.tables orelse return SiardError.EmptyTable;
+        const row = if (idx < tables.len) tables[idx] else return SiardError.BadIndex;
         var int_buf = [_]u8{0} ** 16;
+        var list = std.ArrayList([]const u8).empty;
+        const l = std.fmt.printInt(int_buf[0..], idx, 10, std.fmt.Case.lower, .{});
+        const num = try alloc.dupe(u8, int_buf[0..l]);
+        try list.append(alloc, num);
+        const name = try alloc.dupe(u8, row.name);
+        try list.append(alloc, name);
+        const desc = blk: {
+            if (row.description) |d| {
+                break :blk if (d.len == 0) try alloc.dupe(u8, NULL) else try alloc.dupe(u8, d);
+            } else break :blk try alloc.dupe(u8, NULL);
+        };
+        try list.append(alloc, desc);
+        return list.toOwnedSlice(alloc);
+    }
+
+    pub fn sqlInsertCols(_: *Schema, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "INSERT INTO _columns VALUES ");
-        for (self.tables, 0..) |tbl, idx| {
-            const l = std.fmt.printInt(int_buf[0..], idx, 10, std.fmt.Case.lower, .{});
-            for (tbl.columns, 0..) |col, cidx| {
-                if (idx == 0 and cidx == 0) {
-                    try list.append(alloc, '(');
-                } else {
-                    try list.appendSlice(alloc, ", (");
-                }
-                try list.appendSlice(alloc, int_buf[0..l]);
-                try list.appendSlice(alloc, ", '");
-                try list.appendSlice(alloc, col.name);
-                try list.appendSlice(alloc, "', '");
-                try list.appendSlice(alloc, col.typeOriginal);
-                try list.appendSlice(alloc, "')");
-            }
-        }
+        const plc = try placeholders(alloc, 3);
+        defer alloc.free(plc);
+        try list.appendSlice(alloc, plc);
+        return list.toOwnedSlice(alloc);
+    }
+
+    pub fn sqlInsertColsVals(self: *Schema, alloc: Allocator, tidx: usize, cidx: usize) ![][]const u8 {
+        const tables = self.tables orelse return SiardError.EmptyTable;
+        const tbl = if (tidx < tables.len) tables[tidx] else return SiardError.BadIndex;
+        const col = if (cidx < tbl.columns.len) tbl.columns[cidx] else return SiardError.BadIndex;
+        var int_buf = [_]u8{0} ** 16;
+        var list = std.ArrayList([]const u8).empty;
+        const l = std.fmt.printInt(int_buf[0..], tidx, 10, std.fmt.Case.lower, .{});
+        const num = try alloc.dupe(u8, int_buf[0..l]);
+        try list.append(alloc, num);
+        const name = try alloc.dupe(u8, col.name);
+        try list.append(alloc, name);
+        const otype = blk: {
+            if (col.typeOriginal) |ot| {
+                break :blk if (ot.len == 0) try alloc.dupe(u8, NULL) else try alloc.dupe(u8, ot);
+            } else break :blk try alloc.dupe(u8, NULL);
+        };
+        try list.append(alloc, otype);
         return list.toOwnedSlice(alloc);
     }
 };
@@ -218,7 +257,7 @@ fn toIdx(name: []const u8) !usize {
 const Table = struct {
     name: []const u8,
     folder: []const u8,
-    description: []const u8,
+    description: ?[]const u8,
     columns: []Column,
     primaryKey: PrimaryKey,
     foreignKeys: ?[]ForeignKey,
@@ -227,11 +266,14 @@ const Table = struct {
     fn init(self: *Table, alloc: Allocator, table: xml.xmlNodePtr) !void {
         self.foreignKeys = null;
         var curr = try expect(xml.xmlFirstElementChild(table), "name");
-        self.name = try getSanitised(alloc, curr);
+        self.name = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "folder");
         self.folder = try getValue(alloc, curr);
-        curr = try expect(xml.xmlNextElementSibling(curr), "description");
-        self.description = try getValue(alloc, curr);
+        const desc = expect(xml.xmlNextElementSibling(curr), "description") catch null;
+        if (desc != null) {
+            self.description = try getValue(alloc, desc);
+            curr = desc;
+        } else self.description = null;
         curr = try (expect(xml.xmlNextElementSibling(curr), "columns"));
         const col_count: usize = xml.xmlChildElementCount(curr);
         self.columns = try alloc.alloc(Column, col_count);
@@ -310,6 +352,7 @@ const Table = struct {
         try list.appendSlice(alloc, "INSERT INTO ");
         try list.appendSlice(alloc, self.name);
         try list.appendSlice(alloc, " VALUES ");
+
         const root = xml.xmlDocGetRootElement(doc);
         var row = xml.xmlFirstElementChild(root);
         var firstRow: bool = true;
@@ -354,10 +397,64 @@ const Table = struct {
         return list.toOwnedSlice(alloc);
     }
 
+    // generateSqlInsertStatement
+    pub fn sqlStmt(self: *Table, alloc: Allocator) ![]const u8 {
+        if (self.rows == 0) {
+            return SiardError.EmptyTable;
+        }
+        var list = std.ArrayList(u8).empty;
+        try list.appendSlice(alloc, "INSERT INTO ");
+        try list.appendSlice(alloc, self.name);
+        try list.appendSlice(alloc, " VALUES ");
+        const plc = try placeholders(alloc, @truncate(self.columns.len));
+        defer alloc.free(plc);
+        try list.appendSlice(alloc, plc);
+        return list.toOwnedSlice(alloc);
+    }
+
+    // return a table of values, caller owns the memory.
+    pub fn sqlVals(self: *Table, alloc: Allocator, doc: [*c]xml.xmlDoc) ![][][]const u8 {
+        if (self.rows == 0) {
+            return SiardError.EmptyTable;
+        }
+        var table = std.ArrayList([][][]const u8).empty;
+
+        const root = xml.xmlDocGetRootElement(doc);
+        var row = xml.xmlFirstElementChild(root);
+
+        while (row != null) : (row = xml.xmlNextElementSibling(row)) {
+            var tableRow = std.ArrayList([][]const u8).empty;
+            var col = xml.xmlFirstElementChild(row);
+            var colIdx: usize = try toIdx(std.mem.span(col.*.name));
+            for (self.columns, 0..) |_, cidx| {
+                if (col == null or colIdx > cidx + 1) {
+                    const n = try alloc.dupe(u8, NULL);
+                    try tableRow.append(alloc, n);
+                    continue;
+                }
+                const val: []u8 = std.mem.span(xml.xmlNodeGetContent(col));
+                if (val.len == 0) {
+                    const n = try alloc.dupe(u8, NULL);
+                    try tableRow.append(alloc, n);
+                } else {
+                    const v = try alloc.dupe(u8, val);
+                    try tableRow.append(alloc, v);
+                }
+                col = xml.xmlNextElementSibling(col);
+                if (col != null) {
+                    colIdx = try toIdx(std.mem.span(col.*.name));
+                }
+            }
+            const slc = try tableRow.toOwnedSlice(alloc);
+            try table.append(alloc, slc);
+        }
+        return table.toOwnedSlice(alloc);
+    }
+
     fn deinit(self: *Table, alloc: Allocator) void {
         alloc.free(self.name);
         alloc.free(self.folder);
-        alloc.free(self.description);
+        if (self.description != null) alloc.free(self.description.?);
         for (self.columns) |*col| {
             col.deinit(alloc);
         }
@@ -375,27 +472,27 @@ const Table = struct {
 const Column = struct {
     name: []const u8,
     typ: Typ,
-    typeOriginal: []const u8,
+    typeOriginal: ?[]const u8,
     nullable: bool,
 
     fn init(self: *Column, alloc: Allocator, column: xml.xmlNodePtr) !void {
-        var curr = try expect(xml.xmlFirstElementChild(column), "name");
+        const curr = try expect(xml.xmlFirstElementChild(column), "name");
         self.name = try getValue(alloc, curr);
-        curr = try expect(xml.xmlNextElementSibling(curr), "type");
-        self.typ = Typ.fromStr(std.mem.span(xml.xmlNodeGetContent(curr)));
-        curr = try expect(xml.xmlNextElementSibling(curr), "typeOriginal");
-        self.typeOriginal = try getValue(alloc, curr);
-        curr = try expect(xml.xmlNextElementSibling(curr), "nullable");
-        if (std.mem.eql(u8, std.mem.span(xml.xmlNodeGetContent(curr)), "true") or std.mem.eql(u8, std.mem.span(xml.xmlNodeGetContent(curr)), "TRUE")) {
-            self.nullable = true;
-        } else {
+        const typ = optional(xml.xmlNextElementSibling(curr), "type");
+        self.typ = if (typ != null) Typ.fromStr(std.mem.span(xml.xmlNodeGetContent(typ))) else Typ.fromStr(@constCast("BLOB"));
+        const typeOriginal = optional(curr, "typeOriginal");
+        if (typeOriginal != null) self.typeOriginal = try getValue(alloc, curr) else self.typeOriginal = null;
+        const nullable = optional(curr, "nullable");
+        if (nullable == null) {
             self.nullable = false;
+            return;
         }
+        self.nullable = if (std.mem.eql(u8, std.mem.span(xml.xmlNodeGetContent(curr)), "true") or std.mem.eql(u8, std.mem.span(xml.xmlNodeGetContent(curr)), "TRUE")) true else false;
     }
 
     fn deinit(self: *Column, alloc: Allocator) void {
         alloc.free(self.name);
-        alloc.free(self.typeOriginal);
+        if (self.typeOriginal != null) alloc.free(self.typeOriginal.?);
     }
 };
 
@@ -437,7 +534,7 @@ const ForeignKey = struct {
         curr = try expect(xml.xmlNextElementSibling(curr), "referencedSchema");
         self.refschema = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "referencedTable");
-        self.reftable = try getSanitised(alloc, curr);
+        self.reftable = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "reference");
         curr = try expect(xml.xmlFirstElementChild(curr), "column");
         self.column = try getValue(alloc, curr);
@@ -472,7 +569,7 @@ test "siard" {
     defer s.deinit(std.testing.allocator);
     try std.testing.expect(s.metadata.databaseProduct != null);
     try std.testing.expectEqualStrings(s.metadata.databaseProduct.?, "Microsoft SQL Server 12.00.2000");
-    const sql = try s.schemas[0].tables[0].sqlSchema(std.testing.allocator);
+    const sql = try s.schemas[0].tables.?[0].sqlSchema(std.testing.allocator);
     defer std.testing.allocator.free(sql);
     const expect_sql =
         \\CREATE TABLE if not exists Orders(OrderID INTEGER, CustomerID TEXT, EmployeeID INTEGER, OrderDate TEXT, RequiredDate TEXT, ShippedDate TEXT, ShipVia INTEGER, Freight NUMERIC, ShipName TEXT, ShipAddress TEXT, ShipCity TEXT, ShipRegion TEXT, ShipPostalCode TEXT, ShipCountry TEXT, PRIMARY KEY(OrderID), FOREIGN KEY(CustomerID) REFERENCES Customers(CustomerID), FOREIGN KEY(EmployeeID) REFERENCES Employees(EmployeeID), FOREIGN KEY(ShipVia) REFERENCES Shippers(ShipperID))
@@ -480,8 +577,19 @@ test "siard" {
     try std.testing.expectEqualStrings(expect_sql, sql);
     const metadataInsert = try s.metadata.sqlInsert(std.testing.allocator);
     const expect_metadataInsert =
-        \\INSERT INTO _metadata VALUES ('testnt', '(...)', '2015', 'file:///Northwind/', 'SiardEdit 1.80 Swiss Federal Archives, Berne, Switzerland, 2007-2015', '2015-11-26', 'MD53908342CA03FF371BDB9E92427930893', '10.50.32.247', 'Microsoft SQL Server 12.00.2000', 'jdbc:sqlserver://127.0.0.1:1433; authenticationScheme=nativeAuthentication; xopenStates=false; sendTimeAsDatetime=true; trustServerCertificate=false; sendStringParametersAsUnicode=true; selectMethod=cursor; responseBuffering=adaptive; packetSize=8000; multiSubnetFailover=false; loginTimeout=30; lockTimeout=-1; lastUpdateCount=true; encrypt=false; disableStatementPooling=true; databaseName=NORTHWND; applicationName=Microsoft JDBC Driver for SQL Server; applicationIntent=readwrite;\u0020', 'ptest2')
+        \\INSERT INTO _metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ;
-    defer std.testing.allocator.free(metadataInsert);
     try std.testing.expectEqualStrings(expect_metadataInsert, metadataInsert);
+    std.testing.allocator.free(metadataInsert);
+    const metadataVals = try s.metadata.sqlValues(std.testing.allocator);
+    const exp: [11][]const u8 = .{ "testnt", "(...)", "2015", "file:///Northwind/", "SiardEdit 1.80 Swiss Federal Archives, Berne, Switzerland, 2007-2015", "2015-11-26", "MD53908342CA03FF371BDB9E92427930893", "10.50.32.247", "Microsoft SQL Server 12.00.2000", "jdbc:sqlserver://127.0.0.1:1433; authenticationScheme=nativeAuthentication; xopenStates=false; sendTimeAsDatetime=true; trustServerCertificate=false; sendStringParametersAsUnicode=true; selectMethod=cursor; responseBuffering=adaptive; packetSize=8000; multiSubnetFailover=false; loginTimeout=30; lockTimeout=-1; lastUpdateCount=true; encrypt=false; disableStatementPooling=true; databaseName=NORTHWND; applicationName=Microsoft JDBC Driver for SQL Server; applicationIntent=readwrite;\\u0020", "ptest2" };
+    try std.testing.expectEqualDeep(exp[0..], metadataVals);
+    for (metadataVals) |v| std.testing.allocator.free(v);
+    std.testing.allocator.free(metadataVals);
+}
+
+test "placeholders" {
+    const plc = try placeholders(std.testing.allocator, 5);
+    defer std.testing.allocator.free(plc);
+    try std.testing.expectEqualStrings("(?, ?, ?, ?, ?)", plc);
 }

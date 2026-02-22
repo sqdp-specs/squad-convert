@@ -1,4 +1,3 @@
-//! By convention, root.zig is the root source file when making a library.
 const std = @import("std");
 const zqlite = @import("zqlite");
 const miniz = @import("miniz");
@@ -9,7 +8,30 @@ const Allocator = std.mem.Allocator;
 const SquadError = error{
     BadZip,
     NotFound,
+    IllegalColLength,
 };
+
+// here be dragons
+fn execute(conn: zqlite.Conn, stmt: []const u8, vals: [][]const u8) !void {
+    const max_cols = 256;
+    const init_val = .{};
+    var cur_ptr: *const anyopaque = &init_val;
+    comptime var CurTy = @TypeOf(init_val);
+    comptime var idx: comptime_int = 0;
+    inline while (idx < max_cols) {
+        idx += 1;
+        const cur_val = @as(*const CurTy, @ptrCast(@alignCast(cur_ptr))).*;
+        const new_val = cur_val ++ .{vals[idx - 1]};
+        cur_ptr = &new_val;
+        CurTy = @TypeOf(new_val);
+        if (vals.len == idx) {
+            const final = @as(*const CurTy, @ptrCast(@alignCast(cur_ptr))).*;
+            try conn.exec(stmt, final);
+            return;
+        }
+    }
+    return SquadError.IllegalColLength;
+}
 
 fn zipIndex(archive: *miniz.mz_zip_archive, fname: []const u8) !usize {
     var fs: miniz.mz_zip_archive_file_stat = std.mem.zeroes(miniz.mz_zip_archive_file_stat);
@@ -54,22 +76,39 @@ pub fn convert(alloc: Allocator, path: []const u8) !void {
     defer xml.xmlFreeDoc(doc);
     const s = try Siard.new(alloc, doc);
     defer s.deinit(alloc);
-    // execute metadata schema statements
+    // execute schema statements
     try conn.exec(Siard.metadataSchema, .{});
     try conn.exec(Siard.tablesSchema, .{});
     try conn.exec(Siard.columnsSchema, .{});
-    // // execute metadata insert statements
+    // _metadata insert statements
     const metadataInsert = try s.metadata.sqlInsert(alloc);
-    try conn.exec(metadataInsert, .{});
+    const metadataValues = try s.metadata.sqlValues(alloc);
+    try execute(conn, metadataInsert, metadataValues);
+    for (metadataValues) |v| alloc.free(v);
+    alloc.free(metadataValues);
     alloc.free(metadataInsert);
+
+    const tables = s.schemas[0].tables orelse return;
+    // _table and _column insert statements
     const tableInsert = try s.schemas[0].sqlInsertTbls(alloc);
-    try conn.exec(tableInsert, .{});
+    const colInsert = try s.schemas[0].sqlInsertCols(alloc);
+    for (tables, 0..) |tbl, idx| {
+        const tableVals = try s.schemas[0].sqlInsertTblVals(alloc, idx);
+        try execute(conn, tableInsert, tableVals);
+        for (tableVals) |v| alloc.free(v);
+        alloc.free(tableVals);
+        for (tbl.columns, 0..) |_, cidx| {
+            const colVals = try s.schemas[0].sqlInsertColsVals(alloc, idx, cidx);
+            try execute(conn, colInsert, colVals);
+            for (colVals) |v| alloc.free(v);
+            alloc.free(colVals);
+        }
+    }
     alloc.free(tableInsert);
-    const columnsInsert = try s.schemas[0].sqlInsertCols(alloc);
-    try conn.exec(columnsInsert, .{});
-    alloc.free(columnsInsert);
+    alloc.free(colInsert);
+
     // execute table schema statements
-    for (s.schemas[0].tables) |*tbl| {
+    for (tables) |*tbl| {
         if (tbl.rows == 0) continue;
         const tableSchema = try tbl.sqlSchema(alloc);
         try conn.exec(tableSchema, .{});
@@ -89,20 +128,40 @@ pub fn convert(alloc: Allocator, path: []const u8) !void {
     }
 }
 
-const example = "test/northwind.siard";
+const northwind = "test/northwind.siard";
+const dvdrental = "test/dvd_rental.siard";
+const sfdbmysql = "test/sfdbmysql.siard";
 
 test "tests" {
     _ = @import("Siard.zig");
     _ = @import("types.zig");
 }
 
-test "unzip" {
+test "unzip_northwind" {
     var archive: miniz.mz_zip_archive = std.mem.zeroes(miniz.mz_zip_archive);
-    const res = miniz.mz_zip_reader_init_file(&archive, example, 0);
+    const res = miniz.mz_zip_reader_init_file(&archive, northwind, 0);
     try std.testing.expectEqual(res, 1);
     defer _ = miniz.mz_zip_reader_end(&archive);
     const idx = try zipIndex(&archive, "metadata.xml");
     try std.testing.expectEqual(idx, 1);
+}
+
+test "unzip_dvdrental" {
+    var archive: miniz.mz_zip_archive = std.mem.zeroes(miniz.mz_zip_archive);
+    const res = miniz.mz_zip_reader_init_file(&archive, dvdrental, 0);
+    try std.testing.expectEqual(res, 1);
+    defer _ = miniz.mz_zip_reader_end(&archive);
+    const idx = try zipIndex(&archive, "metadata.xml");
+    try std.testing.expectEqual(idx, 5177);
+}
+
+test "unzip_sfdbmysql" {
+    var archive: miniz.mz_zip_archive = std.mem.zeroes(miniz.mz_zip_archive);
+    const res = miniz.mz_zip_reader_init_file(&archive, sfdbmysql, 0);
+    try std.testing.expectEqual(res, 1);
+    defer _ = miniz.mz_zip_reader_end(&archive);
+    const idx = try zipIndex(&archive, "metadata.xml");
+    try std.testing.expectEqual(idx, 60);
 }
 
 test "sqlite" {
@@ -121,17 +180,27 @@ test "sqlite" {
         \\   FOREIGN KEY(trackartist) REFERENCES artist(artistid)
         \\ )
     , .{});
-    try conn.exec("create table if not exists test (name text)", .{});
-    try conn.exec("insert into test (name) values (?1), (?2)", .{ "Leto", "Ghanima" });
+    try conn.exec("create table if not exists test (name text, surname text)", .{});
+    try conn.exec("insert into test values (?1, ?2)", .{ "Leto", "Atreides" });
     if (try conn.row("select * from test order by name limit 1", .{})) |row| {
         defer row.deinit();
-        try std.testing.expectEqualStrings("Ghanima", row.text(0));
+        try std.testing.expectEqualStrings("Leto", row.text(0));
     }
     conn.close();
     try std.Io.Dir.cwd().deleteFile(std.testing.io, "test.squad");
 }
 
-test "convert" {
-    try convert(std.testing.allocator, example);
+test "northwind" {
+    try convert(std.testing.allocator, northwind);
     try std.Io.Dir.cwd().deleteFile(std.testing.io, "northwind.squad");
 }
+
+// test "dvdrental" {
+//     try convert(std.testing.allocator, dvdrental);
+//     try std.Io.Dir.cwd().deleteFile(std.testing.io, "dvd_rental.squad");
+// }
+
+// test "sfdbmysql" {
+//     try convert(std.testing.allocator, sfdbmysql);
+//     try std.Io.Dir.cwd().deleteFile(std.testing.io, "northwind.squad");
+// }

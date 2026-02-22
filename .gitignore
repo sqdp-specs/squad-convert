@@ -2,3 +2,6 @@
 zig-out
 zig-pkg
 unzipped/
+test/dvd_rental
+test/sfdbmysql
+test/northwind
