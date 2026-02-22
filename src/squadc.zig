@@ -120,11 +120,19 @@ pub fn convert(alloc: Allocator, path: []const u8) !void {
         alloc.free(tpath);
         const t = miniz.mz_zip_reader_extract_to_heap(&archive, @intCast(tidx), @ptrCast(&uncomp_size), 0) orelse return SquadError.BadZip;
         const tdoc = xml.xmlReadMemory(@ptrCast(t), @intCast(uncomp_size), null, "utf-8", xml.XML_PARSE_NOBLANKS | xml.XML_PARSE_RECOVER | xml.XML_PARSE_NOERROR | xml.XML_PARSE_NOWARNING);
-        const ins = try tbl.sqlInsert(alloc, tdoc);
-        conn.exec(ins, .{}) catch std.debug.print("{s}\n", .{conn.lastError()});
+
+        const stmt = try tbl.sqlStmt(alloc);
+        const vals = try tbl.sqlVals(alloc, tdoc);
+        for (vals) |row| {
+            execute(conn, stmt, row) catch std.debug.print("{s}\n", .{conn.lastError()});
+            for (row) |v| alloc.free(v);
+            alloc.free(row);
+        }
+
         xml.xmlFreeDoc(tdoc);
         miniz.mz_free(t);
-        alloc.free(ins);
+        alloc.free(stmt);
+        alloc.free(vals);
     }
 }
 

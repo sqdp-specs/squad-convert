@@ -417,13 +417,13 @@ const Table = struct {
         if (self.rows == 0) {
             return SiardError.EmptyTable;
         }
-        var table = std.ArrayList([][][]const u8).empty;
+        var table = std.ArrayList([][]const u8).empty;
 
         const root = xml.xmlDocGetRootElement(doc);
         var row = xml.xmlFirstElementChild(root);
 
         while (row != null) : (row = xml.xmlNextElementSibling(row)) {
-            var tableRow = std.ArrayList([][]const u8).empty;
+            var tableRow = std.ArrayList([]const u8).empty;
             var col = xml.xmlFirstElementChild(row);
             var colIdx: usize = try toIdx(std.mem.span(col.*.name));
             for (self.columns, 0..) |_, cidx| {
