@@ -6,11 +6,11 @@ As seen at #ipres2025
 
 To do:
 
-- [] remove getSanitisedValue function (preserve column name spaces by quoting)
-- [] check storage types and affinity types, adjust placeholder strategy if needed (e.g. via direct use sqlite)
-- [] check columns with missing types (name [BLANK], x TEXT)
-- [] document remaining features as todo list items e.g. schemas, UDTs, views etc.
-- [] support different versions of Siard spec 1.0-2.2
+- [ ] remove getSanitisedValue function (preserve column name spaces by quoting)
+- [ ] check storage types and affinity types, adjust placeholder strategy if needed (e.g. via direct use sqlite)
+- [ ] check columns with missing types (name [BLANK], x TEXT)
+- [ ] document remaining features as todo list items e.g. schemas, UDTs, views etc.
+- [ ] support different versions of Siard spec 1.0-2.2
 
 Build instructions:
 
