@@ -60,6 +60,8 @@ pub fn convert(alloc: Allocator, path: []const u8) !void {
     var conn = try zqlite.open(squadFile, zqlite.OpenFlags.Create | zqlite.OpenFlags.EXResCode);
     alloc.free(squadFile);
     defer conn.close();
+    try conn.exclusiveTransaction();
+
     // read the archive
     var archive: miniz.mz_zip_archive = std.mem.zeroes(miniz.mz_zip_archive);
     const res = miniz.mz_zip_reader_init_file(&archive, @ptrCast(path), 0);
@@ -134,16 +136,18 @@ pub fn convert(alloc: Allocator, path: []const u8) !void {
         alloc.free(stmt);
         alloc.free(vals);
     }
-}
 
-const northwind = "test/northwind.siard";
-const dvdrental = "test/dvd_rental.siard";
-const sfdbmysql = "test/sfdbmysql.siard";
+    try conn.commit();
+}
 
 test "tests" {
     _ = @import("Siard.zig");
     _ = @import("types.zig");
 }
+
+const northwind = "test/northwind.siard";
+const dvdrental = "test/dvd_rental.siard";
+const sfdbmysql = "test/sfdbmysql.siard";
 
 test "unzip_northwind" {
     var archive: miniz.mz_zip_archive = std.mem.zeroes(miniz.mz_zip_archive);
@@ -203,12 +207,12 @@ test "northwind" {
     try std.Io.Dir.cwd().deleteFile(std.testing.io, "northwind.squad");
 }
 
-// test "dvdrental" {
-//     try convert(std.testing.allocator, dvdrental);
-//     try std.Io.Dir.cwd().deleteFile(std.testing.io, "dvd_rental.squad");
-// }
+test "dvdrental" {
+    try convert(std.testing.allocator, dvdrental);
+    try std.Io.Dir.cwd().deleteFile(std.testing.io, "dvd_rental.squad");
+}
 
-// test "sfdbmysql" {
-//     try convert(std.testing.allocator, sfdbmysql);
-//     try std.Io.Dir.cwd().deleteFile(std.testing.io, "northwind.squad");
-// }
+test "sfdbmysql" {
+    try convert(std.testing.allocator, sfdbmysql);
+    try std.Io.Dir.cwd().deleteFile(std.testing.io, "sfdbmysql.squad");
+}
