@@ -146,13 +146,23 @@ fn getValue(
     return alloc.dupe(u8, std.mem.trim(u8, std.mem.span(xml.xmlNodeGetContent(el)), " \t\r\n"));
 }
 
-fn getSanitisedValue(
+const APO = 39;
+fn quoteIdentifier(
     alloc: Allocator,
-    el: xml.xmlNodePtr,
-) ![]const u8 {
-    const value = std.mem.span(xml.xmlNodeGetContent(el));
-    std.mem.replaceScalar(u8, value, ' ', '_');
-    return alloc.dupe(u8, std.mem.trim(u8, value, " \t\r\n"));
+    val: []const u8,
+) Allocator.Error![]const u8 {
+    const apos = std.mem.countScalar(u8, val, APO);
+    var ret = try alloc.alloc(u8, val.len + 2 + apos);
+    ret[0] = APO;
+    ret[ret.len - 1] = APO;
+    if (apos > 0) {
+        const replaced = try std.mem.replaceOwned(u8, alloc, val, &.{APO}, &.{ APO, APO });
+        @memcpy(ret[1 .. replaced.len + 1], replaced);
+        alloc.free(replaced);
+    } else {
+        @memcpy(ret[1 .. val.len + 1], val);
+    }
+    return ret;
 }
 
 const Schema = struct {
@@ -264,7 +274,7 @@ const Table = struct {
     fn init(self: *Table, alloc: Allocator, table: xml.xmlNodePtr) !void {
         self.foreignKeys = null;
         var curr = try expect(xml.xmlFirstElementChild(table), "name");
-        self.name = try getSanitisedValue(alloc, curr);
+        self.name = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "folder");
         self.folder = try getValue(alloc, curr);
         const desc = expect(xml.xmlNextElementSibling(curr), "description") catch null;
@@ -303,7 +313,9 @@ const Table = struct {
     pub fn sqlSchema(self: *Table, alloc: Allocator) ![]const u8 {
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "CREATE TABLE if not exists ");
-        try list.appendSlice(alloc, self.name);
+        const qname = try quoteIdentifier(alloc, self.name);
+        try list.appendSlice(alloc, qname);
+        alloc.free(qname);
         try list.append(alloc, '(');
         var first: bool = true;
         for (self.columns) |col| {
@@ -312,7 +324,9 @@ const Table = struct {
             } else {
                 first = false;
             }
-            try list.appendSlice(alloc, col.name);
+            const qcname = try quoteIdentifier(alloc, col.name);
+            try list.appendSlice(alloc, qcname);
+            alloc.free(qcname);
             try list.append(alloc, ' ');
             try list.appendSlice(alloc, col.typ.asSqlite());
         }
@@ -324,17 +338,25 @@ const Table = struct {
             } else {
                 first = false;
             }
-            try list.appendSlice(alloc, col);
+            const qpkname = try quoteIdentifier(alloc, col);
+            try list.appendSlice(alloc, qpkname);
+            alloc.free(qpkname);
         }
         try list.append(alloc, ')');
         if (self.foreignKeys) |fks| {
             for (fks) |fk| {
                 try list.appendSlice(alloc, ", FOREIGN KEY(");
-                try list.appendSlice(alloc, fk.column);
+                const qfkcol = try quoteIdentifier(alloc, fk.column);
+                try list.appendSlice(alloc, qfkcol);
+                alloc.free(qfkcol);
                 try list.appendSlice(alloc, ") REFERENCES ");
-                try list.appendSlice(alloc, fk.reftable);
+                const qfktbl = try quoteIdentifier(alloc, fk.reftable);
+                try list.appendSlice(alloc, qfktbl);
+                alloc.free(qfktbl);
                 try list.append(alloc, '(');
-                try list.appendSlice(alloc, fk.referenced);
+                const qfkref = try quoteIdentifier(alloc, fk.referenced);
+                try list.appendSlice(alloc, qfkref);
+                alloc.free(qfkref);
                 try list.append(alloc, ')');
             }
         }
@@ -349,7 +371,9 @@ const Table = struct {
         }
         var list = std.ArrayList(u8).empty;
         try list.appendSlice(alloc, "INSERT INTO ");
-        try list.appendSlice(alloc, self.name);
+        const qname = try quoteIdentifier(alloc, self.name);
+        try list.appendSlice(alloc, qname);
+        alloc.free(qname);
         try list.appendSlice(alloc, " VALUES ");
         const plc = try placeholders(alloc, @truncate(self.columns.len));
         defer alloc.free(plc);
@@ -422,7 +446,7 @@ const Column = struct {
 
     fn init(self: *Column, alloc: Allocator, column: xml.xmlNodePtr) !void {
         const curr = try expect(xml.xmlFirstElementChild(column), "name");
-        self.name = try getSanitisedValue(alloc, curr);
+        self.name = try getValue(alloc, curr);
         const typ = optional(xml.xmlNextElementSibling(curr), "type");
         self.typ = if (typ != null) Typ.fromStr(std.mem.span(xml.xmlNodeGetContent(typ))) else Typ.fromStr(@constCast("BLOB"));
         const typeOriginal = optional(curr, "typeOriginal");
@@ -453,7 +477,7 @@ const PrimaryKey = struct {
         var idx: usize = 0;
         while (idx < col_count) : (idx += 1) {
             curr = try expect(xml.xmlNextElementSibling(curr), "column");
-            self.columns[idx] = try getSanitisedValue(alloc, curr);
+            self.columns[idx] = try getValue(alloc, curr);
         }
     }
 
@@ -479,10 +503,10 @@ const ForeignKey = struct {
         curr = try expect(xml.xmlNextElementSibling(curr), "referencedSchema");
         self.refschema = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "referencedTable");
-        self.reftable = try getSanitisedValue(alloc, curr);
+        self.reftable = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "reference");
         curr = try expect(xml.xmlFirstElementChild(curr), "column");
-        self.column = try getSanitisedValue(alloc, curr);
+        self.column = try getValue(alloc, curr);
         curr = try expect(xml.xmlNextElementSibling(curr), "referenced");
         self.referenced = try getValue(alloc, curr);
     }
@@ -517,7 +541,7 @@ test "siard" {
     const sql = try s.schemas[0].tables.?[0].sqlSchema(std.testing.allocator);
     defer std.testing.allocator.free(sql);
     const expect_sql =
-        \\CREATE TABLE if not exists Orders(OrderID INTEGER, CustomerID TEXT, EmployeeID INTEGER, OrderDate TEXT, RequiredDate TEXT, ShippedDate TEXT, ShipVia INTEGER, Freight NUMERIC, ShipName TEXT, ShipAddress TEXT, ShipCity TEXT, ShipRegion TEXT, ShipPostalCode TEXT, ShipCountry TEXT, PRIMARY KEY(OrderID), FOREIGN KEY(CustomerID) REFERENCES Customers(CustomerID), FOREIGN KEY(EmployeeID) REFERENCES Employees(EmployeeID), FOREIGN KEY(ShipVia) REFERENCES Shippers(ShipperID))
+        \\CREATE TABLE if not exists 'Orders'('OrderID' INTEGER, 'CustomerID' TEXT, 'EmployeeID' INTEGER, 'OrderDate' TEXT, 'RequiredDate' TEXT, 'ShippedDate' TEXT, 'ShipVia' INTEGER, 'Freight' NUMERIC, 'ShipName' TEXT, 'ShipAddress' TEXT, 'ShipCity' TEXT, 'ShipRegion' TEXT, 'ShipPostalCode' TEXT, 'ShipCountry' TEXT, PRIMARY KEY('OrderID'), FOREIGN KEY('CustomerID') REFERENCES 'Customers'('CustomerID'), FOREIGN KEY('EmployeeID') REFERENCES 'Employees'('EmployeeID'), FOREIGN KEY('ShipVia') REFERENCES 'Shippers'('ShipperID'))
     ;
     try std.testing.expectEqualStrings(expect_sql, sql);
     const metadataInsert = try s.metadata.sqlInsert(std.testing.allocator);
@@ -537,4 +561,22 @@ test "placeholders" {
     const plc = try placeholders(std.testing.allocator, 5);
     defer std.testing.allocator.free(plc);
     try std.testing.expectEqualStrings("(?, ?, ?, ?, ?)", plc);
+}
+
+test "quoteidentifier" {
+    const a = "apple";
+    const expect_a = "'apple'";
+    const b = "banana pie";
+    const expect_b = "'banana pie'";
+    const c = "cherry's are richard''s favourite";
+    const expect_c = "'cherry''s are richard''''s favourite'";
+    const result_a = try quoteIdentifier(std.testing.allocator, a);
+    try std.testing.expectEqualStrings(expect_a, result_a);
+    std.testing.allocator.free(result_a);
+    const result_b = try quoteIdentifier(std.testing.allocator, b);
+    try std.testing.expectEqualStrings(expect_b, result_b);
+    std.testing.allocator.free(result_b);
+    const result_c = try quoteIdentifier(std.testing.allocator, c);
+    try std.testing.expectEqualStrings(expect_c, result_c);
+    std.testing.allocator.free(result_c);
 }
